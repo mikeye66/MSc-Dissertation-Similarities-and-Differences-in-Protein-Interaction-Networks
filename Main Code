@@ -1,0 +1,3729 @@
+#Load relevant packages
+install.packages("igraph")
+install.packages("netdist")
+install.packages("devtools")
+install.packages("glue")
+install.packages("readr")
+install.packages("tidyverse")
+install.packages("incgraph")
+install.packages("pvclust")
+install.packages("ade4") 
+install.packages("ape")
+install.packages("Rcpp")
+install.packages("orca")
+install.packages("profvis")
+install.packages("aptg")
+install.packages('TreeDist')
+install.packages("dendextend")
+install.packages("visNetwork")
+install.packages("bc3net")
+install.packages("MCL")
+install.packages("linkcomm")
+install.packages("plyr")
+install.packages("pscl")
+install.packages("dominanceanalysis")
+install.packages("car")
+install.packages("pROC")
+library(pROC)
+library(car)
+library(dominanceanalysis)
+library(pscl)
+library(plyr)
+library(RColorBrewer)
+library(linkcomm)
+library(MCL)
+library(bc3net)
+library(visNetwork)
+library(dendextend)
+library(TreeDist)
+library(aptg)
+library(profvis)
+library(orca)
+library(Rcpp)
+library(ape)
+library(ade4)
+library(incgraph)
+library(tidyverse)
+library(readr)
+library(igraph)
+library(devtools)
+library(netdist)
+install_github("alan-turing-institute/network-comparison")
+library(help = "netdist")
+library(purrr)
+library(pvclust)
+#for GDDA
+source("F:/oxford dissertation/data/NetworkSim/R/netGDD.R")
+#source the GCD code
+source("F:/oxford dissertation/code/OldCode_GDDA_GCD_example.R")
+
+######################
+#data loading section#
+######################
+#here focus on data loading and transform
+#into desired formats
+
+
+#source the parser to load the data
+source("F:/oxford dissertation/code/parser.R")
+
+#routes:
+#main data
+main_data_route <- "F:/oxford dissertation/data organ+code/BIOGRID-ALL-4.4.198.tab3.txt"
+
+#data by organism- Homo_sapiens
+route_homo_sapiens <- "F:/oxford dissertation/data organ+code/BIOGRID-ORGANISM-Homo_sapiens-4.4.198.tab3.txt"
+
+#data by mus musculus
+route_mus_musculus <- "F:/oxford dissertation/data organ+code/BIOGRID-ORGANISM-Mus_musculus-4.4.198.tab3.txt"
+
+#data by yeast
+route_yeast <- "F:/oxford dissertation/data organ+code/BIOGRID-ORGANISM-Saccharomyces_cerevisiae_S288c-4.4.198.tab3.txt"
+
+#data by fly
+route_fly <- "F:/oxford dissertation/data organ+code/BIOGRID-ORGANISM-Drosophila_melanogaster-4.4.198.tab3.txt"
+
+#data by Arabidopsis_thaliana_Columbia
+route_Arabidopsis_thaliana_Columbia <- "F:/oxford dissertation/data organ+code/BIOGRID-ORGANISM-Arabidopsis_thaliana_Columbia-4.4.198.tab3.txt"
+
+#data by Schizosaccharomyces pombe
+route_Schizosaccharomyces_pombe <- "F:/oxford dissertation/data organ+code/BIOGRID-ORGANISM-Schizosaccharomyces_pombe_972h-4.4.198.tab3.txt"
+
+#data by Caenorhabditis elegans
+route_Caenorhabditis_elegans <- "F:/oxford dissertation/data organ+code/BIOGRID-ORGANISM-Caenorhabditis_elegans-4.4.198.tab3.txt"
+
+
+#data loading (by experiment) and sourced parser
+homo_sapien_Y2H <- parse_biogrid(route_homo_sapiens, 
+                                 interspecies = FALSE,
+                                 loops = FALSE,
+                                 experimental_system = "Two-hybrid",
+                                 experimental_system_type = NULL,
+                                 throughput = NULL)
+
+homo_sapien_TAP <- parse_biogrid(route_homo_sapiens, 
+                                 interspecies = FALSE,
+                                 loops = FALSE,
+                                 experimental_system = "Affinity Capture-MS",
+                                 experimental_system_type = NULL,
+                                 throughput = NULL)
+
+yeast_Y2H <- parse_biogrid(route_yeast, 
+                           interspecies = FALSE,
+                           loops = FALSE,
+                           experimental_system = "Two-hybrid",
+                           experimental_system_type = NULL,
+                           throughput = NULL)
+
+yeast_TAP <- parse_biogrid(route_yeast, 
+                           interspecies = FALSE,
+                           loops = FALSE,
+                           experimental_system = "Affinity Capture-MS",
+                           experimental_system_type = NULL,
+                           throughput = NULL)
+
+fly_Y2H <- parse_biogrid(route_fly, 
+                         interspecies = FALSE,
+                         loops = FALSE,
+                         experimental_system = "Two-hybrid",
+                         experimental_system_type = NULL,
+                         throughput = NULL)
+
+fly_TAP <- parse_biogrid(route_fly, 
+                         interspecies = FALSE,
+                         loops = FALSE,
+                         experimental_system = "Affinity Capture-MS",
+                         experimental_system_type = NULL,
+                         throughput = NULL)
+
+Arabidopsis_thaliana_Columbia_Y2H <- parse_biogrid(route_Arabidopsis_thaliana_Columbia, 
+                                                   interspecies = FALSE,
+                                                   loops = FALSE,
+                                                   experimental_system = "Two-hybrid",
+                                                   experimental_system_type = NULL,
+                                                   throughput = NULL)
+
+Arabidopsis_thaliana_Columbia_TAP <- parse_biogrid(route_Arabidopsis_thaliana_Columbia, 
+                                                   interspecies = FALSE,
+                                                   loops = FALSE,
+                                                   experimental_system = "Affinity Capture-MS",
+                                                   experimental_system_type = NULL,
+                                                   throughput = NULL)
+
+mus_musculus_Y2H <- parse_biogrid(route_mus_musculus, 
+                                  interspecies = FALSE,
+                                  loops = FALSE,
+                                  experimental_system = "Two-hybrid",
+                                  experimental_system_type = NULL,
+                                  throughput = NULL)
+
+mus_musculus_TAP <- parse_biogrid(route_mus_musculus, 
+                                  interspecies = FALSE,
+                                  loops = FALSE,
+                                  experimental_system = "Affinity Capture-MS",
+                                  experimental_system_type = NULL,
+                                  throughput = NULL)
+
+Schizosaccharomyces_pombe_Y2H <- parse_biogrid(route_Schizosaccharomyces_pombe, 
+                                               interspecies = FALSE,
+                                               loops = FALSE,
+                                               experimental_system = "Two-hybrid",
+                                               experimental_system_type = NULL,
+                                               throughput = NULL)
+
+Schizosaccharomyces_pombe_TAP <- parse_biogrid(route_Schizosaccharomyces_pombe, 
+                                               interspecies = FALSE,
+                                               loops = FALSE,
+                                               experimental_system = "Affinity Capture-MS",
+                                               experimental_system_type = NULL,
+                                               throughput = NULL)
+
+Caenorhabditis_elegans_Y2H <- parse_biogrid(route_Caenorhabditis_elegans, 
+                                            interspecies = FALSE,
+                                            loops = FALSE,
+                                            experimental_system = "Two-hybrid",
+                                            experimental_system_type = NULL,
+                                            throughput = NULL)
+
+Caenorhabditis_elegans_TAP <- parse_biogrid(route_Caenorhabditis_elegans, 
+                                            interspecies = FALSE,
+                                            loops = FALSE,
+                                            experimental_system = "Affinity Capture-MS",
+                                            experimental_system_type = NULL,
+                                            throughput = NULL)
+
+#transform into igraph
+homo_sapien_Y2H_igraph<- graph_from_data_frame(homo_sapien_Y2H, directed=FALSE)
+homo_sapien_TAP_igraph<- graph_from_data_frame(homo_sapien_TAP, directed=FALSE)
+ecoli_mg1655_Y2H_igraph<- graph_from_data_frame(ecoli_mg1655_Y2H, directed=FALSE)
+ecoli_mg1655_TAP_igraph<- graph_from_data_frame(ecoli_mg1655_TAP, directed=FALSE)
+fly_Y2H_igraph<- graph_from_data_frame(fly_Y2H, directed=FALSE)
+fly_TAP_igraph<- graph_from_data_frame(fly_TAP, directed=FALSE)
+Arabidopsis_thaliana_Columbia_Y2H_igraph<- graph_from_data_frame(Arabidopsis_thaliana_Columbia_Y2H, directed=FALSE)
+Arabidopsis_thaliana_Columbia_TAP_igraph<- graph_from_data_frame(Arabidopsis_thaliana_Columbia_TAP, directed=FALSE)
+mus_musculus_Y2H_igraph<- graph_from_data_frame(mus_musculus_Y2H, directed=FALSE)
+mus_musculus_TAP_igraph<- graph_from_data_frame(mus_musculus_TAP, directed=FALSE)
+yeast_Y2H_igraph<- graph_from_data_frame(yeast_Y2H, directed=FALSE)
+yeast_TAP_igraph<- graph_from_data_frame(yeast_TAP, directed=FALSE)
+Schizosaccharomyces_pombe_Y2H_igraph<- graph_from_data_frame(Schizosaccharomyces_pombe_Y2H, directed=FALSE)
+Schizosaccharomyces_pombe_TAP_igraph<- graph_from_data_frame(Schizosaccharomyces_pombe_TAP, directed=FALSE)
+Caenorhabditis_elegans_Y2H_igraph<- graph_from_data_frame(Caenorhabditis_elegans_Y2H, directed=FALSE)
+Caenorhabditis_elegans_TAP_igraph<- graph_from_data_frame(Caenorhabditis_elegans_TAP, directed=FALSE)
+
+#simplify igraph networks to remove self-loops and multiple edges
+homo_sapien_Y2H_igraph<-simplify_graph(homo_sapien_Y2H_igraph)
+homo_sapien_TAP_igraph<-simplify_graph(homo_sapien_TAP_igraph)
+ecoli_mg1655_Y2H_igraph<-simplify_graph(ecoli_mg1655_Y2H_igraph)
+ecoli_mg1655_TAP_igraph<-simplify_graph(ecoli_mg1655_TAP_igraph)
+fly_Y2H_igraph<-simplify_graph(fly_Y2H_igraph)
+fly_TAP_igraph<-simplify_graph(fly_TAP_igraph)
+Arabidopsis_thaliana_Columbia_Y2H_igraph<-simplify_graph(Arabidopsis_thaliana_Columbia_Y2H_igraph)
+Arabidopsis_thaliana_Columbia_TAP_igraph<-simplify_graph(Arabidopsis_thaliana_Columbia_TAP_igraph)
+yeast_Y2H_igraph<-simplify_graph(yeast_Y2H_igraph)
+yeast_TAP_igraph<-simplify_graph(yeast_TAP_igraph)
+mus_musculus_Y2H_igraph<-simplify_graph(mus_musculus_Y2H_igraph)
+mus_musculus_TAP_igraph<-simplify_graph(mus_musculus_TAP_igraph)
+Schizosaccharomyces_pombe_Y2H_igraph<- simplify_graph(Schizosaccharomyces_pombe_Y2H_igraph)
+Schizosaccharomyces_pombe_TAP_igraph<- simplify_graph(Schizosaccharomyces_pombe_TAP_igraph)
+covid_Y2H_igraph<- simplify_graph(covid_Y2H_igraph)
+covid_TAP_igraph<- simplify_graph(covid_TAP_igraph)
+Caenorhabditis_elegans_Y2H_igraph<- simplify_graph(Caenorhabditis_elegans_Y2H_igraph)
+Caenorhabditis_elegans_TAP_igraph<- simplify_graph(Caenorhabditis_elegans_TAP_igraph)
+
+#loading datasets containing different experiments
+all_homo_sapien<-parse_biogrid_all(route_homo_sapiens)
+all_ecoli_mg1655<-parse_biogrid_all(route_ecoli_mg1655)
+all_fly<-parse_biogrid_all(route_fly)
+all_Arabidopsis_thaliana_Columbia<-parse_biogrid_all(route_Arabidopsis_thaliana_Columbia)
+all_mus_musculus<-parse_biogrid_all(route_mus_musculus)
+all_yeast<-parse_biogrid_all(route_yeast)
+all_Schizosaccharomyces_pombe<- parse_biogrid_all(route_Schizosaccharomyces_pombe)
+all_Caenorhabditis_elegans<- parse_biogrid_all(route_Caenorhabditis_elegans)
+
+#transform 'all experiment' data into igraph object
+all_Arabidopsis_thaliana_Columbia_igraph<- graph_from_data_frame(all_Arabidopsis_thaliana_Columbia[,-3])
+all_ecoli_mg1655_igraph<- graph_from_data_frame(all_ecoli_mg1655[,-3])
+all_fly_igraph<- graph_from_data_frame(all_fly[,-3])
+all_homo_sapien_igraph<- graph_from_data_frame(all_homo_sapien[,-3])
+all_mus_musculus_igraph<- graph_from_data_frame(all_mus_musculus[,-3])
+all_yeast_igraph<- graph_from_data_frame(all_yeast[,-3])
+all_Schizosaccharomyces_pombe_igraph<- graph_from_data_frame(all_Schizosaccharomyces_pombe[,-3])
+all_Caenorhabditis_elegans_igraph<- graph_from_data_frame(all_Caenorhabditis_elegans[,-3])
+
+
+#simplify
+all_Arabidopsis_thaliana_Columbia_igraph<- simplify_graph(all_Arabidopsis_thaliana_Columbia_igraph)
+all_ecoli_mg1655_igraph<- simplify_graph(all_ecoli_mg1655_igraph)
+all_fly_igraph<- simplify_graph(all_fly_igraph)
+all_homo_sapien_igraph<- simplify_graph(all_homo_sapien_igraph)
+all_mus_musculus_igraph<- simplify_graph(all_mus_musculus_igraph)
+all_yeast_igraph<- simplify_graph(all_yeast_igraph)
+all_Schizosaccharomyces_pombe_igraph<- simplify_graph(all_Schizosaccharomyces_pombe_igraph)
+all_Caenorhabditis_elegans_igraph<- simplify_graph(all_Caenorhabditis_elegans_igraph)
+
+
+#obtained the largest connected part for each network
+homo_sapien_Y2H_igraph_large<-getgcc(homo_sapien_Y2H_igraph)
+homo_sapien_TAP_igraph_large<-getgcc(homo_sapien_TAP_igraph)
+fly_Y2H_igraph_large<-getgcc(fly_Y2H_igraph)
+fly_TAP_igraph_large<-getgcc(fly_TAP_igraph)
+Arabidopsis_thaliana_Columbia_Y2H_igraph_large<-getgcc(Arabidopsis_thaliana_Columbia_Y2H_igraph)
+Arabidopsis_thaliana_Columbia_TAP_igraph_large<-getgcc(Arabidopsis_thaliana_Columbia_TAP_igraph)
+yeast_Y2H_igraph_large<-getgcc(yeast_Y2H_igraph)
+yeast_TAP_igraph_large<-getgcc(yeast_TAP_igraph)
+mus_musculus_Y2H_igraph_large<-getgcc(mus_musculus_Y2H_igraph)
+mus_musculus_TAP_igraph_large<-getgcc(mus_musculus_TAP_igraph)
+Schizosaccharomyces_pombe_Y2H_igraph_large<-getgcc(Schizosaccharomyces_pombe_Y2H_igraph)
+Schizosaccharomyces_pombe_TAP_igraph_large<-getgcc(Schizosaccharomyces_pombe_TAP_igraph)
+Caenorhabditis_elegans_Y2H_igraph_large<-getgcc(Caenorhabditis_elegans_Y2H_igraph)
+Caenorhabditis_elegans_TAP_igraph_large<-getgcc(Caenorhabditis_elegans_TAP_igraph)
+
+
+
+#########################
+#Network summary metrics#
+#########################
+#this section evalute the summary metrics of networks
+#in terms of dissertation, some output are for data quality evaluation
+#some are for later analysis in disseratation
+
+#below are for full networks
+#number of edges
+ecount(all_Arabidopsis_thaliana_Columbia_igraph)
+ecount(all_fly_igraph)
+ecount(all_homo_sapien_igraph)
+ecount(all_mus_musculus_igraph)
+ecount(all_yeast_igraph)
+ecount(all_Schizosaccharomyces_pombe_igraph)
+ecount(all_Caenorhabditis_elegans_igraph)
+#
+ecount(homo_sapien_Y2H_igraph)
+ecount(homo_sapien_TAP_igraph)
+ecount(fly_Y2H_igraph)
+ecount(fly_TAP_igraph)
+ecount(Arabidopsis_thaliana_Columbia_Y2H_igraph)
+ecount(Arabidopsis_thaliana_Columbia_TAP_igraph)
+ecount(yeast_Y2H_igraph)
+ecount(yeast_TAP_igraph)
+ecount(mus_musculus_Y2H_igraph)
+ecount(mus_musculus_TAP_igraph)
+ecount(Schizosaccharomyces_pombe_Y2H_igraph)
+ecount(Schizosaccharomyces_pombe_TAP_igraph)
+ecount(Caenorhabditis_elegans_Y2H_igraph)
+ecount(Caenorhabditis_elegans_TAP_igraph)
+
+#number of vertices
+gorder(all_Arabidopsis_thaliana_Columbia_igraph)
+gorder(all_fly_igraph)
+gorder(all_homo_sapien_igraph)
+gorder(all_mus_musculus_igraph)
+gorder(all_yeast_igraph)
+gorder(all_Schizosaccharomyces_pombe_igraph)
+gorder(all_Caenorhabditis_elegans_igraph)
+#
+gorder(homo_sapien_Y2H_igraph)
+gorder(homo_sapien_TAP_igraph)
+gorder(fly_Y2H_igraph)
+gorder(fly_TAP_igraph)
+gorder(Arabidopsis_thaliana_Columbia_Y2H_igraph)
+gorder(Arabidopsis_thaliana_Columbia_TAP_igraph)
+gorder(yeast_Y2H_igraph)
+gorder(yeast_TAP_igraph)
+gorder(mus_musculus_Y2H_igraph)
+gorder(mus_musculus_TAP_igraph)
+gorder(Schizosaccharomyces_pombe_Y2H_igraph)
+gorder(Schizosaccharomyces_pombe_TAP_igraph)
+gorder(Caenorhabditis_elegans_Y2H_igraph)
+gorder(Caenorhabditis_elegans_TAP_igraph)
+
+#density
+graph.density(homo_sapien_Y2H_igraph)
+graph.density(homo_sapien_TAP_igraph)
+graph.density(fly_Y2H_igraph)
+graph.density(fly_TAP_igraph)
+graph.density(Arabidopsis_thaliana_Columbia_Y2H_igraph)
+graph.density(Arabidopsis_thaliana_Columbia_TAP_igraph)
+graph.density(yeast_Y2H_igraph)
+graph.density(yeast_TAP_igraph)
+graph.density(mus_musculus_Y2H_igraph)
+graph.density(mus_musculus_TAP_igraph)
+graph.density(Schizosaccharomyces_pombe_Y2H_igraph)
+graph.density(Schizosaccharomyces_pombe_TAP_igraph)
+graph.density(Caenorhabditis_elegans_Y2H_igraph)
+graph.density(Caenorhabditis_elegans_TAP_igraph)
+
+#to investigate number of disconnected components
+components(homo_sapien_Y2H_igraph)
+components(homo_sapien_TAP_igraph)
+components(fly_Y2H_igraph)
+components(fly_TAP_igraph)
+components(Arabidopsis_thaliana_Columbia_Y2H_igraph)
+components(Arabidopsis_thaliana_Columbia_TAP_igraph)
+components(yeast_Y2H_igraph)
+components(yeast_TAP_igraph)
+components(mus_musculus_Y2H_igraph)
+components(mus_musculus_TAP_igraph)
+components(Schizosaccharomyces_pombe_Y2H_igraph)
+components(Schizosaccharomyces_pombe_TAP_igraph)
+components(Caenorhabditis_elegans_Y2H_igraph)
+components(Caenorhabditis_elegans_TAP_igraph)
+
+
+#From here, the code is about to
+#investigate the largest connected component
+average.path.length(homo_sapien_Y2H_igraph, unconnected = T)
+average.path.length(fly_Y2H_igraph, unconnected = T)
+average.path.length(Arabidopsis_thaliana_Columbia_Y2H_igraph, unconnected = T)
+average.path.length(yeast_Y2H_igraph, unconnected = T)
+average.path.length(mus_musculus_Y2H_igraph, unconnected = T)
+average.path.length(homo_sapien_TAP_igraph, unconnected = T)
+average.path.length(fly_TAP_igraph, unconnected = T)
+average.path.length(Arabidopsis_thaliana_Columbia_TAP_igraph, unconnected = T)
+average.path.length(yeast_TAP_igraph, unconnected = T)
+average.path.length(mus_musculus_TAP_igraph, unconnected = T)
+average.path.length(Schizosaccharomyces_pombe_Y2H_igraph, unconnected = T)
+average.path.length(Schizosaccharomyces_pombe_TAP_igraph, unconnected = T)
+average.path.length(Caenorhabditis_elegans_Y2H_igraph, unconnected = T)
+average.path.length(Caenorhabditis_elegans_TAP_igraph, unconnected = T)
+average.path.length(Rattus_norvegicus_Y2H_igraph, unconnected = T)
+average.path.length(Rattus_norvegicus_TAP_igraph, unconnected = T)
+average.path.length(Candida_albicans_Y2H_igraph, unconnected = T)
+average.path.length(Candida_albicans_TAP_igraph, unconnected = T)
+
+
+#number of edges
+ecount(homo_sapien_Y2H_igraph_large)
+ecount(homo_sapien_TAP_igraph_large)
+ecount(fly_Y2H_igraph_large)
+ecount(fly_TAP_igraph_large)
+ecount(Arabidopsis_thaliana_Columbia_Y2H_igraph_large)
+ecount(Arabidopsis_thaliana_Columbia_TAP_igraph_large)
+ecount(yeast_Y2H_igraph_large)
+ecount(yeast_TAP_igraph_large)
+ecount(mus_musculus_Y2H_igraph_large)
+ecount(mus_musculus_TAP_igraph_large)
+ecount(Schizosaccharomyces_pombe_Y2H_igraph_large)
+ecount(Schizosaccharomyces_pombe_TAP_igraph_large)
+ecount(Caenorhabditis_elegans_Y2H_igraph_large)
+ecount(Caenorhabditis_elegans_TAP_igraph_large)
+
+
+#number of vertices
+gorder(homo_sapien_Y2H_igraph_large)
+gorder(homo_sapien_TAP_igraph_large)
+gorder(fly_Y2H_igraph_large)
+gorder(fly_TAP_igraph_large)
+gorder(Arabidopsis_thaliana_Columbia_Y2H_igraph_large)
+gorder(Arabidopsis_thaliana_Columbia_TAP_igraph_large)
+gorder(yeast_Y2H_igraph_large)
+gorder(yeast_TAP_igraph_large)
+gorder(mus_musculus_Y2H_igraph_large)
+gorder(mus_musculus_TAP_igraph_large)
+gorder(Schizosaccharomyces_pombe_Y2H_igraph_large)
+gorder(Schizosaccharomyces_pombe_TAP_igraph_large)
+gorder(Caenorhabditis_elegans_Y2H_igraph_large)
+gorder(Caenorhabditis_elegans_TAP_igraph_large)
+
+
+#density
+graph.density(homo_sapien_Y2H_igraph_large)
+graph.density(homo_sapien_TAP_igraph_large)
+graph.density(fly_Y2H_igraph_large)
+graph.density(fly_TAP_igraph_large)
+graph.density(Arabidopsis_thaliana_Columbia_Y2H_igraph_large)
+graph.density(Arabidopsis_thaliana_Columbia_TAP_igraph_large)
+graph.density(yeast_Y2H_igraph_large)
+graph.density(yeast_TAP_igraph_large)
+graph.density(mus_musculus_Y2H_igraph_large)
+graph.density(mus_musculus_TAP_igraph_large)
+graph.density(Schizosaccharomyces_pombe_Y2H_igraph_large)
+graph.density(Schizosaccharomyces_pombe_TAP_igraph_large)
+graph.density(Caenorhabditis_elegans_Y2H_igraph_large)
+graph.density(Caenorhabditis_elegans_TAP_igraph_large)
+
+#local transitivity
+transitivity(homo_sapien_Y2H_igraph_large)
+transitivity(homo_sapien_TAP_igraph_large)
+transitivity(fly_Y2H_igraph_large)
+transitivity(fly_TAP_igraph_large)
+transitivity(Arabidopsis_thaliana_Columbia_Y2H_igraph_large)
+transitivity(Arabidopsis_thaliana_Columbia_TAP_igraph_large)
+transitivity(yeast_Y2H_igraph_large)
+transitivity(yeast_TAP_igraph_large)
+transitivity(mus_musculus_Y2H_igraph_large)
+transitivity(mus_musculus_TAP_igraph_large)
+transitivity(Schizosaccharomyces_pombe_Y2H_igraph_large)
+transitivity(Schizosaccharomyces_pombe_TAP_igraph_large)
+transitivity(Caenorhabditis_elegans_Y2H_igraph_large)
+transitivity(Caenorhabditis_elegans_TAP_igraph_large)
+
+#average degree
+mean(degree(homo_sapien_Y2H_igraph_large))
+mean(degree(homo_sapien_TAP_igraph_large))
+mean(degree(fly_Y2H_igraph_large))
+mean(degree(fly_TAP_igraph_large))
+mean(degree(Arabidopsis_thaliana_Columbia_Y2H_igraph_large))
+mean(degree(Arabidopsis_thaliana_Columbia_TAP_igraph))
+mean(degree(yeast_Y2H_igraph_large))
+mean(degree(yeast_TAP_igraph_large))
+mean(degree(mus_musculus_Y2H_igraph_large))
+mean(degree(mus_musculus_TAP_igraph_large))
+mean(degree(Schizosaccharomyces_pombe_Y2H_igraph_large))
+mean(degree(Schizosaccharomyces_pombe_TAP_igraph_large))
+mean(degree(Caenorhabditis_elegans_Y2H_igraph_large))
+mean(degree(Caenorhabditis_elegans_TAP_igraph_large))
+
+#highest degree
+max(degree(homo_sapien_Y2H_igraph_large))
+max(degree(homo_sapien_TAP_igraph_large))
+max(degree(fly_Y2H_igraph_large))
+max(degree(fly_TAP_igraph_large))
+max(degree(Arabidopsis_thaliana_Columbia_Y2H_igraph_large))
+max(degree(Arabidopsis_thaliana_Columbia_TAP_igraph))
+max(degree(yeast_Y2H_igraph_large))
+max(degree(yeast_TAP_igraph_large))
+max(degree(mus_musculus_Y2H_igraph_large))
+max(degree(mus_musculus_TAP_igraph_large))
+max(degree(Schizosaccharomyces_pombe_Y2H_igraph_large))
+max(degree(Schizosaccharomyces_pombe_TAP_igraph_large))
+max(degree(Caenorhabditis_elegans_Y2H_igraph_large))
+max(degree(Caenorhabditis_elegans_TAP_igraph_large))
+
+#diameters
+diameter(homo_sapien_Y2H_igraph_large)
+diameter(homo_sapien_TAP_igraph_large)
+diameter(fly_Y2H_igraph_large)
+diameter(fly_TAP_igraph_large)
+diameter(Arabidopsis_thaliana_Columbia_Y2H_igraph_large)
+diameter(Arabidopsis_thaliana_Columbia_TAP_igraph_large)
+diameter(yeast_Y2H_igraph_large)
+diameter(yeast_TAP_igraph_large)
+diameter(mus_musculus_Y2H_igraph_large)
+diameter(mus_musculus_TAP_igraph_large)
+diameter(Schizosaccharomyces_pombe_Y2H_igraph_large)
+diameter(Schizosaccharomyces_pombe_TAP_igraph_large)
+diameter(Caenorhabditis_elegans_Y2H_igraph_large)
+diameter(Caenorhabditis_elegans_TAP_igraph_large)
+
+
+
+#####################
+#Network Comparisons#
+#####################
+#this section focus on implementing graphlet-based approaches
+#to compare network
+#Note some code are sourced in the package loading section
+
+#NetEMD#########
+#implement NetEMD on the largest connected component
+#first to obtain the graphlet degree distribution
+fly_TAP_gdd2_large<-gdd(fly_TAP_igraph_large,max_graphlet_size = 5)
+fly_Y2H_gdd2_large<-gdd(fly_Y2H_igraph_large,max_graphlet_size = 5)
+homo_sapien_Y2H_gdd2_large<-gdd(homo_sapien_Y2H_igraph_large,max_graphlet_size = 5)
+Arabidopsis_thaliana_Columbia_Y2H_gdd2_large<-gdd(Arabidopsis_thaliana_Columbia_Y2H_igraph_large,max_graphlet_size = 5)
+yeast_Y2H_gdd2_large<-gdd(yeast_Y2H_igraph_large,max_graphlet_size = 5)
+mus_musculus_Y2H_gdd2_large<-gdd(mus_musculus_Y2H_igraph_large,max_graphlet_size = 5)
+homo_sapien_TAP_gdd2_large<-gdd(homo_sapien_TAP_igraph_large,max_graphlet_size = 5)
+Arabidopsis_thaliana_Columbia_TAP_gdd2_large<-gdd(Arabidopsis_thaliana_Columbia_TAP_igraph_large,max_graphlet_size = 5)
+yeast_TAP_gdd2_large<-gdd(yeast_TAP_igraph_large,max_graphlet_size = 5)
+mus_musculus_TAP_gdd2_large<-gdd(mus_musculus_TAP_igraph_large,max_graphlet_size = 5)
+Schizosaccharomyces_pombe_Y2H_gdd2_large<- gdd(Schizosaccharomyces_pombe_Y2H_igraph_large,max_graphlet_size = 5)
+Schizosaccharomyces_pombe_TAP_gdd2_large<- gdd(Schizosaccharomyces_pombe_TAP_igraph_large,max_graphlet_size = 5)
+Caenorhabditis_elegans_Y2H_gdd2_large<- gdd(Caenorhabditis_elegans_Y2H_igraph_large,max_graphlet_size = 5)
+Caenorhabditis_elegans_TAP_gdd2_large<- gdd(Caenorhabditis_elegans_TAP_igraph_large,max_graphlet_size = 5) 
+
+#summarize graphlet degree distribution in a list
+gdd_list2_large<-list(homo_sapien_Y2H_gdd2_large,
+                      homo_sapien_TAP_gdd2_large,
+                      fly_Y2H_gdd2_large,
+                      fly_TAP_gdd2_large,
+                      Arabidopsis_thaliana_Columbia_Y2H_gdd2_large,
+                      Arabidopsis_thaliana_Columbia_TAP_gdd2_large,
+                      yeast_Y2H_gdd2_large,
+                      yeast_TAP_gdd2_large,
+                      mus_musculus_Y2H_gdd2_large,
+                      mus_musculus_TAP_gdd2_large,
+                      Schizosaccharomyces_pombe_Y2H_gdd2_large,
+                      Schizosaccharomyces_pombe_TAP_gdd2_large,
+                      Caenorhabditis_elegans_Y2H_gdd2_large,
+                      Caenorhabditis_elegans_TAP_gdd2_large)
+
+#initalise an empty matrix
+emd_five_matrix2_large<-matrix(0,14,14)
+#fill in the NetEMD values
+for (i in 1:14){
+  for (j in i:14) {
+    inpu_emd<-net_emd(gdd_list2_large[[i]],gdd_list2_large[[j]])
+    emd_five_matrix2_large[i,j]<-inpu_emd
+  }
+} 
+#save to a new matrix
+saveemd_five_matrix2_large<-emd_five_matrix2_large
+#name for plotting
+colnames(saveemd_five_matrix2_large)<-c("Human Y2H","Human TAP","Fly Y2H","Fly TAP","Rockress Y2H","Rockress TAP",
+                                        "Yeast Y2H","Yeast TAP","Mouse Y2H","Mouse TAP","Fission Yeast Y2H","Fisson Yeast TAP",
+                                        "Round Worm Y2H","Round Worm TAP")
+#make it sysmmetric
+saveemd_five_matrix2_large<-t(saveemd_five_matrix2_large)+saveemd_five_matrix2_large
+#make sure the diagonal is zero
+diag(saveemd_five_matrix2_large)<-rep(0,14)
+#transorm to distance matrix for clustering
+test_cluster_emd2_five_large<-as.dist(saveemd_five_matrix2_large, diag = T)
+pdf("emd_large.pdf")
+plot(hclust(test_cluster_emd2_five_large, method = "average"),main = "NetEMD Dendrogram for The Largest Connected Components",xlab="")
+dev.off()
+
+
+#we want to see how long does it take to implement
+profvis({gdd_list2_large_time<-list(homo_sapien_Y2H_gdd2_large,
+                                    homo_sapien_TAP_gdd2_large,
+                                    fly_Y2H_gdd2_large,
+                                    fly_TAP_gdd2_large,
+                                    Arabidopsis_thaliana_Columbia_Y2H_gdd2_large,
+                                    Arabidopsis_thaliana_Columbia_TAP_gdd2_large,
+                                    yeast_Y2H_gdd2_large,
+                                    yeast_TAP_gdd2_large,
+                                    mus_musculus_Y2H_gdd2_large,
+                                    mus_musculus_TAP_gdd2_large,
+                                    Schizosaccharomyces_pombe_Y2H_gdd2_large,
+                                    Schizosaccharomyces_pombe_TAP_gdd2_large,
+                                    Caenorhabditis_elegans_Y2H_gdd2_large,
+                                    Caenorhabditis_elegans_TAP_gdd2_large)
+
+emd_five_matrix2_large_time<-matrix(0,14,14)
+for (i in 1:14){
+  for (j in i:14) {
+    inpu_emd<-net_emd(gdd_list2_large[[i]],gdd_list2_large[[j]])
+    emd_five_matrix2_time[i,j]<-inpu_emd
+  }
+} })
+#took 1960ms
+
+
+
+
+
+
+
+
+#Netdis#########
+#This section implements the Netdis
+#the following code is adjusted from the Alan institution
+#adapted to improve computational speed by cacheing a range of 
+#values
+netdis_large<-function(){
+  tree_igraph_list<-list(homo_sapien_Y2H_igraph_large,
+                         homo_sapien_TAP_igraph_large,
+                         fly_Y2H_igraph_large,
+                         fly_TAP_igraph_large,
+                         Arabidopsis_thaliana_Columbia_Y2H_igraph_large,
+                         Arabidopsis_thaliana_Columbia_TAP_igraph_large,
+                         yeast_Y2H_igraph_large,
+                         yeast_TAP_igraph_large,
+                         mus_musculus_Y2H_igraph_large,
+                         mus_musculus_TAP_igraph_large,
+                         Schizosaccharomyces_pombe_Y2H_igraph_large,
+                         Schizosaccharomyces_pombe_TAP_igraph_large,
+                         Caenorhabditis_elegans_Y2H_igraph_large,
+                         Caenorhabditis_elegans_TAP_igraph_large)
+  
+  null_net_matrix1<-matrix(0,ncol = 14,nrow = 14)
+  null_net_matrix2<-matrix(0,ncol = 14,nrow = 14)
+  
+  max_graphlet_size = 4
+  neighbourhood_size = 2
+  min_ego_nodes = 3
+  min_ego_edges=1
+  min_bin_count=5
+  num_bins=100
+  
+  ego_counts<-list()
+  ego_graphs<-list()
+  for(i in 1:14){
+    ego_graphs[[i]]<-make_named_ego_graph(tree_igraph_list[[i]], 
+                                          order = neighbourhood_size, 
+                                          min_ego_nodes = min_ego_nodes, 
+                                          min_ego_edges = min_ego_edges)
+    ego_counts[[i]]<-ego_to_graphlet_counts(ego_graphs[[i]], max_graphlet_size = max_graphlet_size)
+  }
+  
+  for (i in 1:14){
+    for (j in i:14) {
+      graph_1<-tree_igraph_list[[i]]
+      graph_2<-tree_igraph_list[[j]]
+      ego_1<-ego_graphs[[i]]
+      ego_2<-ego_graphs[[j]]
+      graphlet_counts_1<-ego_counts[[i]]
+      graphlet_counts_2<-ego_counts[[j]]
+      # Get ego-network densities
+      densities_1 <- ego_network_density(graphlet_counts_1)
+      densities_2 <- ego_network_density(graphlet_counts_2)
+      
+      # Adaptively bin ego-network densities
+      binned_densities_1 <- binned_densities_adaptive(densities_1, 
+                                                      min_counts_per_interval = min_bin_count, 
+                                                      num_intervals = num_bins)
+      
+      ego_density_bins_1 <- binned_densities_1$breaks
+      
+      binned_densities_2 <- binned_densities_adaptive(densities_2, 
+                                                      min_counts_per_interval = min_bin_count, 
+                                                      num_intervals = num_bins)
+      
+      ego_density_bins_2 <- binned_densities_2$breaks
+      #' INTERNAL FUNCTION - DO NOT CALL DIRECTLY
+      #' Calculate expected counts with geometric poisson (Polya-Aeppli)
+      #' approximation for a single density bin.
+      #' @param bin_idx Density bin index to calculate expected counts for.
+      #' @param graphlet_counts Graphlet counts for a number of ego_networks.
+      #' @param density_interval_indexes Density bin index for
+      #' each ego network.
+      exp_counts_bin_gp <- function(bin_idx, graphlet_counts,
+                                    density_interval_indexes,
+                                    mean_binned_graphlet_counts,
+                                    max_graphlet_size) {
+        counts <- graphlet_counts[density_interval_indexes == bin_idx, ]
+        means <- mean_binned_graphlet_counts[bin_idx, ]
+        
+        mean_sub_counts <- sweep(counts, 2, means)
+        
+        Vd_sq <- colSums(mean_sub_counts^2) / (nrow(mean_sub_counts) - 1)
+        theta_d <- 2 * means / (Vd_sq + means)
+        
+        exp_counts_dk <- vector()
+        for (k in 2:max_graphlet_size) {
+          graphlet_idx <- graphlet_ids_for_size(k)
+          
+          lambda_dk <- mean(2 * means[graphlet_idx]^2 /
+                              (Vd_sq[graphlet_idx] + means[graphlet_idx]),
+                            na.rm = TRUE)
+          
+          exp_counts_dk <- append(exp_counts_dk,
+                                  lambda_dk / theta_d[graphlet_idx])
+        }
+        
+        exp_counts_dk
+      }
+      
+      #' Calculate expected counts in density bins using the
+      #' geometric poisson (Polya-Aeppli) approximation.
+      #' @param graphlet_counts Graphlet counts for a number of ego_networks.
+      #' @param density_interval_indexes Density bin index for
+      #' each ego network.
+      #' @param max_graphlet_size Determines the maximum size of graphlets
+      #' included in graphlet_counts.
+      #' @export
+      density_binned_counts_gp <- function(graphlet_counts,
+                                           density_interval_indexes,
+                                           max_graphlet_size) {
+        
+        mean_binned_graphlet_counts <- mean_density_binned_graphlet_counts(
+          graphlet_counts,
+          density_interval_indexes)
+        
+        nbins <- length(unique(density_interval_indexes))
+        expected_counts_bin <- t(sapply(1:nbins,
+                                        exp_counts_bin_gp,
+                                        graphlet_counts = graphlet_counts,
+                                        density_interval_indexes = density_interval_indexes,
+                                        mean_binned_graphlet_counts = mean_binned_graphlet_counts,
+                                        max_graphlet_size = max_graphlet_size))
+        
+        # deal with NAs caused by bins with zero counts for a graphlet
+        expected_counts_bin[is.nan(expected_counts_bin)] <- 0
+        
+        expected_counts_bin
+      }
+      
+      binned_graphlet_counts_1 <- density_binned_counts_gp(graphlet_counts_1,
+                                                           binned_densities_1$interval_indexes,
+                                                           max_graphlet_size)
+      
+      binned_graphlet_counts_2 <- density_binned_counts_gp(graphlet_counts_2,
+                                                           binned_densities_2$interval_indexes,
+                                                           max_graphlet_size)
+      # Calculate expected graphlet counts for each ego network
+      exp_graphlet_counts_1 <- netdis_expected_counts(graphlet_counts_1, 
+                                                      ego_density_bins_1, 
+                                                      binned_graphlet_counts_1,
+                                                      max_graphlet_size,
+                                                      scale_fn = NULL)
+      
+      
+      exp_graphlet_counts_2 <- netdis_expected_counts(graphlet_counts_2, 
+                                                      ego_density_bins_2, 
+                                                      binned_graphlet_counts_2,
+                                                      max_graphlet_size,
+                                                      scale_fn = NULL)
+      # Centre graphlet counts by subtracting expected counts
+      centred_graphlet_counts_1 <- netdis_subtract_exp_counts(graphlet_counts_1,
+                                                              exp_graphlet_counts_1,
+                                                              max_graphlet_size)
+      
+      centred_graphlet_counts_2 <- netdis_subtract_exp_counts(graphlet_counts_2,
+                                                              exp_graphlet_counts_2,
+                                                              max_graphlet_size)
+      sum_graphlet_counts_1 <- colSums(centred_graphlet_counts_1)
+      
+      sum_graphlet_counts_2 <- colSums(centred_graphlet_counts_2)
+      netdis_result <- netdis_uptok(sum_graphlet_counts_1, 
+                                    sum_graphlet_counts_2, 
+                                    max_graphlet_size)
+      null_net_matrix1[i,j]<-netdis_result[1]
+      null_net_matrix2[i,j]<-netdis_result[2]
+    }
+  } 
+  return(list(null_net_matrix1,null_net_matrix2))
+}
+
+#initalise empty Netdis matrix(for size 4)
+large_netdis_matrix<-netdis_large()
+large_netdis_matrix4<-large_netdis_matrix[[2]]
+#name for plotting
+colnames(large_netdis_matrix4)<-c("Human Y2H","Human TAP","Fly Y2H","Fly TAP","Rockress Y2H","Rockress TAP",
+                                  "Yeast Y2H","Yeast TAP","Mouse Y2H","Mouse TAP","Fission Yeast Y2H","Fisson Yeast TAP",
+                                  "Round Worm Y2H","Round Worm TAP")
+
+#make it symetric
+large_netdis_matrix4<-t(large_netdis_matrix4)+large_netdis_matrix4
+#make sure diagnal is zero
+diag(large_netdis_matrix4)<-rep(0,14)
+#transform to distance matrix for plotting purpose
+cluster_large_netdis_matrix4<-as.dist(large_netdis_matrix4, diag = T)
+pdf("net4_large.pdf")
+plot(hclust(cluster_large_netdis_matrix4, method = "average"), main="NetDis (Size 4) Dendrogram for The Largest Connected Components",
+     xlab="")
+dev.off()
+
+#similar to the above, this is implemented with size 4
+large_netdis_matrix3<-large_netdis_matrix[[1]]
+large_netdis_matrix3<-large_netdis_matrix3
+colnames(large_netdis_matrix3)<-c("Human Y2H","Human TAP","Fly Y2H","Fly TAP","Rockress Y2H","Rockress TAP",
+                                  "Yeast Y2H","Yeast TAP","Mouse Y2H","Mouse TAP","Fission Yeast Y2H","Fisson Yeast TAP",
+                                  "Round Worm Y2H","Round Worm TAP")
+large_netdis_matrix3<-t(large_netdis_matrix3)+large_netdis_matrix3
+diag(large_netdis_matrix3)<-rep(0,14)
+cluster_large_netdis_matrix3<-as.dist(large_netdis_matrix3, diag = T)
+pdf("net3_large.pdf")
+plot(hclust(cluster_large_netdis_matrix3, method = "average"), main="NetDis (Size 3) Dendrogram for The Largest Connected Components",xlab="")
+dev.off()
+
+
+#gdda############
+#This is gdda for the largest connected components
+#store a list of largest connected components
+newgcdlist_large<-list(homo_sapien_Y2H_igraph_large,
+                       homo_sapien_TAP_igraph_large,
+                       fly_Y2H_igraph_large,
+                       fly_TAP_igraph_large,
+                       Arabidopsis_thaliana_Columbia_Y2H_igraph_large,
+                       Arabidopsis_thaliana_Columbia_TAP_igraph_large,
+                       yeast_Y2H_igraph_large,
+                       yeast_TAP_igraph_large,
+                       mus_musculus_Y2H_igraph_large,
+                       mus_musculus_TAP_igraph_large,
+                       Schizosaccharomyces_pombe_Y2H_igraph_large,
+                       Schizosaccharomyces_pombe_TAP_igraph_large,
+                       Caenorhabditis_elegans_Y2H_igraph_large,
+                       Caenorhabditis_elegans_TAP_igraph_large)
+#initalise an empty matrix for GDDA
+gdda_matrix2<-matrix(0,ncol = 14,nrow = 14)
+#input the GDDA
+for (i in 1:14){
+  for (j in i:14) {
+    inpu_gdd<-netGDD(newgcdlist_large[[i]],newgcdlist_large[[j]])
+    gdda_matrix2[i,j]<-inpu_gdd
+  }
+} 
+#save it
+savegdda2<-gdda_matrix2
+#rename it for plotting purpose
+colnames(savegdda2)<-c("Human Y2H","Human TAP","Fly Y2H","Fly TAP","Rockress Y2H","Rockress TAP",
+                       "Yeast Y2H","Yeast TAP","Mouse Y2H","Mouse TAP","Fission Yeast Y2H","Fisson Yeast TAP",
+                       "Round Worm Y2H","Round Worm TAP")
+savegdda2<-savegdda2+t(savegdda2)
+savegdda2<-1-savegdda2
+diag(savegdda2)<-rep(0,14)
+test_gdda2<-as.dist(savegdda2, diag = T)
+pdf("gdda_large.pdf")
+plot(hclust(test_gdda2, method = "average"), main = "GDDA Dendrogram for The Largest Connected Components",xlab = "")
+dev.off()
+
+
+
+#GCD#########
+#This is GCD11 for largest connected components
+#note here the newgcdlist_large is re-used
+gcd11_four_matrix_large<-matrix(0,ncol = 14,nrow = 14)
+for (i in 1:14){
+  for (j in i:14) {
+    pa<-orca2(newgcdlist_large[[i]], subgraph_size = "five")
+    pb<-orca2(newgcdlist_large[[j]], subgraph_size = "five")
+    inpu_gcd112_large<-gcd(pa,pb, whatorbits="5nodes")
+    gcd11_four_matrix_large[i,j]<-inpu_gcd112_large
+  }
+} 
+#similar to other clustering
+savegcd11_four_matrix_large<-gcd11_four_matrix_large
+colnames(savegcd11_four_matrix_large)<-c("Human Y2H","Human TAP","Fly Y2H","Fly TAP","Rockress Y2H","Rockress TAP",
+                                         "Yeast Y2H","Yeast TAP","Mouse Y2H","Mouse TAP","Fission Yeast Y2H","Fisson Yeast TAP",
+                                         "Round Worm Y2H","Round Worm TAP")
+savegcd11_four_matrix_large<-t(savegcd11_four_matrix_large)+savegcd11_four_matrix_large
+diag(savegcd11_four_matrix_large)<-rep(0,14)
+test_cluster44_large<-as.dist(savegcd11_four_matrix_large, diag = T)
+pdf("gcd_large.pdf")
+plot(hclust(test_cluster44_large, method = "average"),main = "GCD11 Dendrogram Clustering for The Largest Connected Components",xlab = "")
+dev.off()
+
+
+
+
+###############################
+#Pholygenetic Tree Comparisons#
+###############################
+#Tree############
+#this section focuses on comparing the pholygenetics trees of
+#the constructed dendragrams with the NCBI tree
+#building tree
+#first load in the data with experimental types combined,
+#meaning all experimental types are considered
+homo_sapien_combined<- parse_biogrid(route_homo_sapiens, 
+                                     interspecies = FALSE,
+                                     loops = FALSE,
+                                     experimental_system = NULL,
+                                     experimental_system_type = NULL,
+                                     throughput = NULL)
+
+
+yeast_combined <- parse_biogrid(route_yeast, 
+                                interspecies = FALSE,
+                                loops = FALSE,
+                                experimental_system = NULL,
+                                experimental_system_type = NULL,
+                                throughput = NULL)
+
+fly_combined <- parse_biogrid(route_fly, 
+                              interspecies = FALSE,
+                              loops = FALSE,
+                              experimental_system = NULL,
+                              experimental_system_type = NULL,
+                              throughput = NULL)
+
+
+Arabidopsis_thaliana_Columbia_combined <- parse_biogrid(route_Arabidopsis_thaliana_Columbia, 
+                                                        interspecies = FALSE,
+                                                        loops = FALSE,
+                                                        experimental_system = NULL,
+                                                        experimental_system_type = NULL,
+                                                        throughput = NULL)
+
+mus_musculus_combined <- parse_biogrid(route_mus_musculus, 
+                                       interspecies = FALSE,
+                                       loops = FALSE,
+                                       experimental_system = NULL,
+                                       experimental_system_type = NULL,
+                                       throughput = NULL)
+
+Schizosaccharomyces_pombe_combined <- parse_biogrid(route_Schizosaccharomyces_pombe, 
+                                                    interspecies = FALSE,
+                                                    loops = FALSE,
+                                                    experimental_system = NULL,
+                                                    experimental_system_type = NULL,
+                                                    throughput = NULL)
+
+
+Rattus_norvegicus_combined <- parse_biogrid(route_Rattus_norvegicus, 
+                                            interspecies = FALSE,
+                                            loops = FALSE,
+                                            experimental_system = NULL,
+                                            experimental_system_type = NULL,
+                                            throughput = NULL)
+
+Candida_albicans_combined <- parse_biogrid(route_Candida_albicans, 
+                                           interspecies = FALSE,
+                                           loops = FALSE,
+                                           experimental_system = NULL,
+                                           experimental_system_type = NULL,
+                                           throughput = NULL)
+
+Caenorhabditis_elegans_combined <- parse_biogrid(route_Caenorhabditis_elegans, 
+                                                 interspecies = FALSE,
+                                                 loops = FALSE,
+                                                 experimental_system = NULL,
+                                                 experimental_system_type = NULL,
+                                                 throughput = NULL)
+
+#transform into igraph
+homo_sapien_combined_igraph<-graph_from_data_frame(homo_sapien_combined)
+yeast_combined_igraph<-graph_from_data_frame(yeast_combined)
+fly_combined_igraph<-graph_from_data_frame(fly_combined)
+Caenorhabditis_elegans_combined_igraph<-graph_from_data_frame(Caenorhabditis_elegans_combined)
+Rattus_norvegicus_combined_igraph<-graph_from_data_frame(Rattus_norvegicus_combined)
+Candida_albicans_combined_igraph<-graph_from_data_frame(Candida_albicans_combined)
+Schizosaccharomyces_pombe_combined_igraph<-graph_from_data_frame(Schizosaccharomyces_pombe_combined)
+mus_musculus_combined_igraph<-graph_from_data_frame(mus_musculus_combined)
+Arabidopsis_thaliana_Columbia_combined_igraph<-graph_from_data_frame(Arabidopsis_thaliana_Columbia_combined)
+
+#simplify them
+homo_sapien_combined_igraph<-simplify_graph(homo_sapien_combined_igraph)
+yeast_combined_igraph<-simplify_graph(yeast_combined_igraph)
+fly_combined_igraph<-simplify_graph(fly_combined_igraph)
+Caenorhabditis_elegans_combined_igraph<-simplify_graph(Caenorhabditis_elegans_combined_igraph)
+Rattus_norvegicus_combined_igraph<-simplify_graph(Rattus_norvegicus_combined_igraph)
+Candida_albicans_combined_igraph<-simplify_graph(Candida_albicans_combined_igraph)
+Schizosaccharomyces_pombe_combined_igraph<-simplify_graph(Schizosaccharomyces_pombe_combined_igraph)
+mus_musculus_combined_igraph<-simplify_graph(mus_musculus_combined_igraph)
+Arabidopsis_thaliana_Columbia_combined_igraph<-simplify_graph(Arabidopsis_thaliana_Columbia_combined_igraph)
+
+#similar netdis function, byt for common trees
+combined_tree_netdis<-function(){
+  
+  tree_igraph_list<-list(homo_sapien_combined_igraph,
+                         yeast_combined_igraph,
+                         fly_combined_igraph,
+                         Caenorhabditis_elegans_combined_igraph,
+                         Schizosaccharomyces_pombe_combined_igraph,
+                         mus_musculus_combined_igraph,
+                         Arabidopsis_thaliana_Columbia_combined_igraph)
+  
+  null_net_matrix1<-matrix(0,ncol = 7,nrow = 7)
+  null_net_matrix2<-matrix(0,ncol = 7,nrow = 7)
+  
+  max_graphlet_size = 4
+  neighbourhood_size = 2
+  min_ego_nodes = 3
+  min_ego_edges=1
+  min_bin_count=5
+  num_bins=100
+  
+  ego_counts<-list()
+  ego_graphs<-list()
+  for(i in 1:7){
+    ego_graphs[[i]]<-make_named_ego_graph(tree_igraph_list[[i]], 
+                                          order = neighbourhood_size, 
+                                          min_ego_nodes = min_ego_nodes, 
+                                          min_ego_edges = min_ego_edges)
+    ego_counts[[i]]<-ego_to_graphlet_counts(ego_graphs[[i]], max_graphlet_size = max_graphlet_size)
+  }
+  
+  for (i in 1:7){
+    for (j in i:7) {
+      graph_1<-tree_igraph_list[[i]]
+      graph_2<-tree_igraph_list[[j]]
+      ego_1<-ego_graphs[[i]]
+      ego_2<-ego_graphs[[j]]
+      graphlet_counts_1<-ego_counts[[i]]
+      graphlet_counts_2<-ego_counts[[j]]
+      # Get ego-network densities
+      densities_1 <- ego_network_density(graphlet_counts_1)
+      densities_2 <- ego_network_density(graphlet_counts_2)
+      
+      # Adaptively bin ego-network densities
+      binned_densities_1 <- binned_densities_adaptive(densities_1, 
+                                                      min_counts_per_interval = min_bin_count, 
+                                                      num_intervals = num_bins)
+      
+      ego_density_bins_1 <- binned_densities_1$breaks
+      
+      binned_densities_2 <- binned_densities_adaptive(densities_2, 
+                                                      min_counts_per_interval = min_bin_count, 
+                                                      num_intervals = num_bins)
+      
+      ego_density_bins_2 <- binned_densities_2$breaks
+      #' INTERNAL FUNCTION - DO NOT CALL DIRECTLY
+      #' Calculate expected counts with geometric poisson (Polya-Aeppli)
+      #' approximation for a single density bin.
+      #' @param bin_idx Density bin index to calculate expected counts for.
+      #' @param graphlet_counts Graphlet counts for a number of ego_networks.
+      #' @param density_interval_indexes Density bin index for
+      #' each ego network.
+      exp_counts_bin_gp <- function(bin_idx, graphlet_counts,
+                                    density_interval_indexes,
+                                    mean_binned_graphlet_counts,
+                                    max_graphlet_size) {
+        counts <- graphlet_counts[density_interval_indexes == bin_idx, ]
+        means <- mean_binned_graphlet_counts[bin_idx, ]
+        
+        mean_sub_counts <- sweep(counts, 2, means)
+        
+        Vd_sq <- colSums(mean_sub_counts^2) / (nrow(mean_sub_counts) - 1)
+        theta_d <- 2 * means / (Vd_sq + means)
+        
+        exp_counts_dk <- vector()
+        for (k in 2:max_graphlet_size) {
+          graphlet_idx <- graphlet_ids_for_size(k)
+          
+          lambda_dk <- mean(2 * means[graphlet_idx]^2 /
+                              (Vd_sq[graphlet_idx] + means[graphlet_idx]),
+                            na.rm = TRUE)
+          
+          exp_counts_dk <- append(exp_counts_dk,
+                                  lambda_dk / theta_d[graphlet_idx])
+        }
+        
+        exp_counts_dk
+      }
+      
+      #' Calculate expected counts in density bins using the
+      #' geometric poisson (Polya-Aeppli) approximation.
+      #' @param graphlet_counts Graphlet counts for a number of ego_networks.
+      #' @param density_interval_indexes Density bin index for
+      #' each ego network.
+      #' @param max_graphlet_size Determines the maximum size of graphlets
+      #' included in graphlet_counts.
+      #' @export
+      density_binned_counts_gp <- function(graphlet_counts,
+                                           density_interval_indexes,
+                                           max_graphlet_size) {
+        
+        mean_binned_graphlet_counts <- mean_density_binned_graphlet_counts(
+          graphlet_counts,
+          density_interval_indexes)
+        
+        nbins <- length(unique(density_interval_indexes))
+        expected_counts_bin <- t(sapply(1:nbins,
+                                        exp_counts_bin_gp,
+                                        graphlet_counts = graphlet_counts,
+                                        density_interval_indexes = density_interval_indexes,
+                                        mean_binned_graphlet_counts = mean_binned_graphlet_counts,
+                                        max_graphlet_size = max_graphlet_size))
+        
+        # deal with NAs caused by bins with zero counts for a graphlet
+        expected_counts_bin[is.nan(expected_counts_bin)] <- 0
+        
+        expected_counts_bin
+      }
+      
+      binned_graphlet_counts_1 <- density_binned_counts_gp(graphlet_counts_1,
+                                                           binned_densities_1$interval_indexes,
+                                                           max_graphlet_size)
+      
+      binned_graphlet_counts_2 <- density_binned_counts_gp(graphlet_counts_2,
+                                                           binned_densities_2$interval_indexes,
+                                                           max_graphlet_size)
+      # Calculate expected graphlet counts for each ego network
+      exp_graphlet_counts_1 <- netdis_expected_counts(graphlet_counts_1, 
+                                                      ego_density_bins_1, 
+                                                      binned_graphlet_counts_1,
+                                                      max_graphlet_size,
+                                                      scale_fn = NULL)
+      
+      
+      exp_graphlet_counts_2 <- netdis_expected_counts(graphlet_counts_2, 
+                                                      ego_density_bins_2, 
+                                                      binned_graphlet_counts_2,
+                                                      max_graphlet_size,
+                                                      scale_fn = NULL)
+      # Centre graphlet counts by subtracting expected counts
+      centred_graphlet_counts_1 <- netdis_subtract_exp_counts(graphlet_counts_1,
+                                                              exp_graphlet_counts_1,
+                                                              max_graphlet_size)
+      
+      centred_graphlet_counts_2 <- netdis_subtract_exp_counts(graphlet_counts_2,
+                                                              exp_graphlet_counts_2,
+                                                              max_graphlet_size)
+      sum_graphlet_counts_1 <- colSums(centred_graphlet_counts_1)
+      
+      sum_graphlet_counts_2 <- colSums(centred_graphlet_counts_2)
+      netdis_result <- netdis_uptok(sum_graphlet_counts_1, 
+                                    sum_graphlet_counts_2, 
+                                    max_graphlet_size)
+      null_net_matrix1[i,j]<-netdis_result[1]
+      null_net_matrix2[i,j]<-netdis_result[2]
+    }
+  } 
+  return(list(null_net_matrix1,null_net_matrix2))
+}
+
+#implemented it to obtain relevant clustering
+tree_netdis_combined<-combined_tree_netdis()
+tree_netdis_combined3<-tree_netdis_combined[[1]]
+tree_netdis_combined4<-tree_netdis_combined[[2]]
+tree_netdis_combined3<-t(tree_netdis_combined3)+tree_netdis_combined3
+diag(tree_netdis_combined3)<-rep(0,7)
+tree_netdis_combined4<-t(tree_netdis_combined4)+tree_netdis_combined4
+diag(tree_netdis_combined4)<-rep(0,7)
+rownames(tree_netdis_combined3)<-c("human","yeast","fly","round worm","fission yeast","mouse","rockress")
+rownames(tree_netdis_combined4)<-c("human","yeast","fly","round worm","fission yeast","mouse","rockress")
+tree_netdis_combined3<-as.dist(tree_netdis_combined3, diag = T)
+tree_netdis_combined4<-as.dist(tree_netdis_combined4, diag = T)
+plot(hclust(tree_netdis_combined3, method = "average"))
+plot(hclust(tree_netdis_combined4, method = "average"))
+
+#now the tree is availble, input it into tree format for comparison
+combined_tree<-(read.tree(text = '((human:0.5,yeast:0.5):0.2):4.1,((fission yeast:0.5,mouse:0.5):1.6,(fly:0.4,(rockress:0.4,round worm:0.4):0.7):0.4);'))
+pdf("combine_net_genetic.pdf")
+plot(combined_tree,main="Combined Experiments Netdis Pholygenetic Tree")
+dev.off()
+
+#this is the NCBI tree
+genetictree<-(read.tree(text='((((mouse:2.4,human:3.5):7.2,(fly:10,round worm:10):0.7):1.1,(yeast:1.5,fission yeast:3):8.8):0.4,rockress:12.2);'))
+pdf("ncbitree.pdf")
+plot(genetictree, main="NCBI Pholygenetic Tree")
+dev.off()
+
+#compute the three metrics to compare combined experiment tree with 
+#the NCBI tree
+MutualClusteringInfo(genetictree,combined_tree)
+SharedPhylogeneticInfo(genetictree,combined_tree)
+NyeSimilarity(genetictree,combined_tree)
+
+
+#Plot the Y2H and TAP clustering of Netdis with size 4
+plot(hclust(as.dist(savenet2_matrix2[seq(1,13,2)]), method = "average"))
+plot(hclust(as.dist(savenet2_matrix2[seq(2,14,2)]), method = "average"))
+#read in Netdis tree with size 4 for TAP
+net_tree_4_Y2H<-(read.tree(text='(fly:0.6,(yeast:0.6,((mouse:0.7,fission yeast:0.7):1.1,(human:0.7,(rockress:0.6,round worm:0.7):0.3):0.6):0.6):0.4);'))
+pdf("net4_genetic_y2h.pdf")
+plot(net_tree_4_Y2H,main="Netdis(size 4) Pholygenetic Tree for Y2H Experiments")
+dev.off()
+#three metrics
+MutualClusteringInfo(genetictree,net_tree_4_Y2H)
+SharedPhylogeneticInfo(genetictree,net_tree_4_Y2H)
+NyeSimilarity(genetictree,net_tree_4_Y2H)
+
+#read in Netdis tree with size 4 for Y2H
+net_tree_4_TAP<-(read.tree(text='((human:0.6,yeast:0.6):6,(fly:0.6,((fission yeast:0.6,(rockress:0.6,mouse:0.6,round worm:0.6):0.1):0.3):3.5):4.2);'))
+pdf("net4_genetic_tap.pdf")
+plot(net_tree_4_TAP,main="Netdis(size 4) Pholygenetic Tree for TAP Experiments")
+dev.off()
+#three metrics
+MutualClusteringInfo(genetictree,net_tree_4_TAP)
+SharedPhylogeneticInfo(genetictree,net_tree_4_TAP)
+NyeSimilarity(genetictree,net_tree_4_TAP)
+
+
+#Above are for Netdis tree comparison
+#not starts tree comparison for NetEMD
+
+#plot the dendrogram for NetEMD
+rownames(saveemd_five_matrix2)<-c("human","human","fly","fly","rockress","rockress","yeast","yeast","mouse","mouse","fission yeast","fission yeast","round worm","round worm")
+saveemd_five_matrix2_Y2H<-saveemd_five_matrix2[seq(1,13,2),seq(1,13,2)]
+saveemd_five_matrix2_TAP<-saveemd_five_matrix2[seq(2,14,2),seq(2,14,2)]
+saveemd_five_matrix2_Y2H_dist<-as.dist(saveemd_five_matrix2_Y2H, diag = T)
+plot(hclust(saveemd_five_matrix2_Y2H_dist, method = "average"))
+saveemd_five_matrix2_TAP_dist<-as.dist(saveemd_five_matrix2_TAP, diag = T)
+plot(hclust(saveemd_five_matrix2_TAP_dist, method = "average"))
+#now have dendragrams for TAP and Y2H NetEMD tree
+
+#Repeat NetEMD on the combined experiments data
+#precedure similar to NetEMD
+homo_sapien_combined_igraph_gdd<-gdd(homo_sapien_combined_igraph)
+yeast_combined_igraph_gdd<-gdd(yeast_combined_igraph)
+fly_combined_igraph_gdd<-gdd(fly_combined_igraph)
+Caenorhabditis_elegans_combined_igraph_gdd<-gdd(Caenorhabditis_elegans_combined_igraph)
+Rattus_norvegicus_combined_igraph_gdd<-gdd(Rattus_norvegicus_combined_igraph)
+Candida_albicans_combined_igraph_gdd<-gdd(Candida_albicans_combined_igraph)
+Schizosaccharomyces_pombe_combined_igraph_gdd<-gdd(Schizosaccharomyces_pombe_combined_igraph)
+mus_musculus_combined_igraph_gdd<-gdd(mus_musculus_combined_igraph)
+Arabidopsis_thaliana_Columbia_combined_igraph_gdd<-gdd(Arabidopsis_thaliana_Columbia_combined_igraph)
+
+combined_gdd_list<-list(homo_sapien_combined_igraph_gdd,
+                        yeast_combined_igraph_gdd,
+                        fly_combined_igraph_gdd,
+                        Caenorhabditis_elegans_combined_igraph_gdd,
+                        Schizosaccharomyces_pombe_combined_igraph_gdd,
+                        mus_musculus_combined_igraph_gdd,
+                        Arabidopsis_thaliana_Columbia_combined_igraph_gdd)
+combined_emd_matrix<-matrix(0,7,7)
+for (i in 1:7){
+  for (j in i:7) {
+    inpu_emd<-net_emd(combined_gdd_list[[i]],combined_gdd_list[[j]])
+    combined_emd_matrix[i,j]<-inpu_emd
+  }
+} 
+combined_saveemd_matrix<-combined_emd_matrix
+rownames(combined_saveemd_matrix)<-c("human","yeast","fly","round worm","rat","dimorphc fungus","fission yeast","mouse","rockress")
+combined_saveemd_matrix<-t(combined_saveemd_matrix)+combined_saveemd_matrix
+diag(combined_saveemd_matrix)<-rep(0,7)
+combined_test_cluster_emd<-as.dist(combined_saveemd_matrix, diag = T)
+plot(hclust(combined_test_cluster_emd, method = "average"))
+
+
+#now read all tree data
+EMD_TAP_tree<-(read.tree(text='((round worm:0.7,(fission yeast:0.7,(rockress:0.7,(mouse:0.7):0.7):0.7):0.2):5.2,(fly:0.7,(human:0.7,yeast:0.7):1.8):4.5);'))
+pdf("emd_tap_genetic.pdf")
+plot(EMD_TAP_tree,main="NetEMD Pholygenetic Tree for TAP Experiments")
+dev.off()
+
+EMD_Y2H_tree<-(read.tree(text='(mouse:0.6,(fission yeast:0.5,(yeast:0.5,(fly:0.5,(human:0.6,(rockress:0.5,round worm:0.5):0.3):0.4):0.3):0.1):0.4):4.3;'))
+pdf("emd_y2h_genetic.pdf")
+plot(EMD_Y2H_tree,main="NetEMD Pholygenetic Tree for Y2H Experiments")
+dev.off()
+
+combine_EMD_tree<-(read.tree(text='(yeast:0.5,((fission yeast:0.5,(mouse:0.5,((round worm:0.5,rockress:0.5):1,(human:0.5,fly:0.5):0.3):0.3):0.6):1.2):2);'))
+pdf("emd_combine_genetic.pdf")
+plot(combine_EMD_tree,main="NetEMD Pholygenetic Tree for Combined Experiments")
+dev.off()
+
+#compute the three metrics to compare with NCBI tree
+#combined tree
+MutualClusteringInfo(genetictree,combine_EMD_tree)
+SharedPhylogeneticInfo(genetictree,combine_EMD_tree)
+NyeSimilarity(genetictree,combine_EMD_tree)
+TreeDistance(genetictree,combine_EMD_tree)
+
+#Y2H
+MutualClusteringInfo(genetictree,EMD_Y2H_tree)
+SharedPhylogeneticInfo(genetictree,EMD_Y2H_tree)
+NyeSimilarity(genetictree,EMD_Y2H_tree)
+TreeDistance(genetictree,EMD_Y2H_tree)
+
+#TAP
+MutualClusteringInfo(genetictree,EMD_TAP_tree)
+SharedPhylogeneticInfo(genetictree,EMD_TAP_tree)
+NyeSimilarity(genetictree,EMD_TAP_tree)
+TreeDistance(genetictree,EMD_TAP_tree)
+
+
+
+#significance testing##########
+
+#significance testing for NetEMD
+new_self_testing_EMD_large2<-function(){
+  select<-seq(1,13,2)
+  null_networklist<-list()
+  netlist<-list(as.data.frame(get.edgelist(homo_sapien_Y2H_igraph_large)),
+                as.data.frame(get.edgelist(homo_sapien_TAP_igraph_large)),
+                as.data.frame(get.edgelist(fly_Y2H_igraph_large)),
+                as.data.frame(get.edgelist(fly_TAP_igraph_large)),
+                as.data.frame(get.edgelist(Arabidopsis_thaliana_Columbia_Y2H_igraph_large)),
+                as.data.frame(get.edgelist(Arabidopsis_thaliana_Columbia_TAP_igraph_large)),
+                as.data.frame(get.edgelist(yeast_Y2H_igraph_large)),
+                as.data.frame(get.edgelist(yeast_TAP_igraph_large)),
+                as.data.frame(get.edgelist(mus_musculus_Y2H_igraph_large)),
+                as.data.frame(get.edgelist(mus_musculus_TAP_igraph_large)),
+                as.data.frame(get.edgelist(Schizosaccharomyces_pombe_Y2H_igraph_large)),
+                as.data.frame(get.edgelist(Schizosaccharomyces_pombe_TAP_igraph_large)),
+                as.data.frame(get.edgelist(Caenorhabditis_elegans_Y2H_igraph_large)),
+                as.data.frame(get.edgelist(Caenorhabditis_elegans_TAP_igraph_large)))
+  for (i in select){
+    newnet<-rbind(netlist[[i]],netlist[[i+1]])
+    sizei<-nrow(netlist[[i]])
+    sizei1<-nrow(netlist[[i+1]])
+    sizeall<-nrow(newnet)
+    sele<-sample(1:sizeall)
+    newnet1<-sele[1:sizei]
+    newnet2<-sele[sizei+1:sizeall]
+    newnet1_data<-newnet[newnet1,]
+    newnet2_data<-newnet[newnet2,]
+    newnet1_igraph<-graph_from_data_frame(newnet1_data)
+    newnet2_igraph<-graph_from_data_frame(newnet2_data)
+    newnet1_igraph<-simplify_graph(newnet1_igraph)
+    newnet2_igraph<-simplify_graph(newnet2_igraph)
+    null_networklist[[i]]<-newnet1_igraph
+    null_networklist[[i+1]]<-newnet2_igraph
+  }
+  for (i in 1:14) {
+    null_networklist[[i]]<-gdd(null_networklist[[i]])
+  }
+  #now all gdd
+  null_net_matrix<-matrix(0,14,14)
+  for (i in 1:14){
+    for (j in i:14) {
+      inpu_emd<-net_emd(null_networklist[[i]],null_networklist[[j]])
+      null_net_matrix[i,j]<-inpu_emd
+    }
+  } 
+  return(null_net_matrix)
+}
+new_testing_bundle_EMD_large2<-sapply(1:200, function(x){new_self_testing_EMD_large2()})
+new_repetition_bundle_EMD_large2<-sapply(1:200, function(x){new_self_testing_EMD_large2()})
+rep_bundle_all_emd_large2<-list()
+for (i in 1:200) {
+  processing<-matrix(new_repetition_bundle_EMD_large2[,i],nrow = 14,ncol = 14)
+  processing<-t(processing)+processing
+  diag(processing)<-rep(0,14)
+  processing<-list(processing)
+  rep_bundle_all_emd_large2<-c(rep_bundle_all_emd_large2,processing)
+}
+testing_bundle_all_emd_large2<-list()
+for (i in 1:200) {
+  processing<-matrix(new_testing_bundle_EMD_large2[,i],nrow = 14,ncol = 14)
+  processing<-t(processing)+processing
+  diag(processing)<-rep(0,14)
+  processing<-list(processing)
+  testing_bundle_all_emd_large2<-c(testing_bundle_all_emd_large2,processing)
+}
+multiple_test(observed = saveemd_five_matrix2_large,testing_bundle = testing_bundle_all_emd_large2,rep_bundle = rep_bundle_all_emd_large2,mantel_time = 1000)
+
+
+
+
+#design a function for computing final p-value
+#using simulations
+multiple_test<-function(observed, testing_bundle, rep_bundle,mantel_time){
+  #testing bundle should be a list of matrices generated by the self_testing
+  testing_size<-length(testing_bundle)
+  
+  #p_value_obsrved is a vector of p-values
+  #initialse p_value_observed
+  p_value_observed<-rep(0,testing_size)
+  #process p_value_observed
+  for (i in 1:testing_size) {
+    p_value_observed[i]<-mantel.test(observed,testing_bundle[[i]],nperm=mantel_time,alternative = "two.sided")$z.stat
+  }
+  
+  #rep_bundle is a list of matrices  
+  rep_size<-length(rep_bundle)
+  #initalise a matrix for testing p_values
+  #row for each rep testing set
+  testing_p_value_matrix<-matrix(0,nrow=rep_size,ncol =testing_size )
+  for (i in 1:rep_size) {
+    for (j in 1:testing_size) {
+      testing_p_value_matrix[i,j]<-mantel.test(testing_bundle[[j]],rep_bundle[[i]],nperm=mantel_time,alternative = "two.sided")$z.stat
+    }
+  }
+  
+  #now, average p_values for each rep
+  out2_test<-apply(testing_p_value_matrix,1,mean)
+  out1_oberseved<-mean(p_value_observed)
+  
+  #calculate final p_value
+  out3<-min(length(out2_test[out2_test<out1_oberseved]),length(out2_test[out2_test>out1_oberseved]))/(rep_size+1)
+  
+  #output
+  return(list(out1_oberseved, out2_test, out3))
+}
+
+
+
+#Testing of average shortest path###########
+degree_homo_sapien_Y2H_igraph_large<-(degree(homo_sapien_Y2H_igraph_large))
+degree_fly_Y2H_igraph_large<-(degree(fly_Y2H_igraph_large))
+degree_Arabidopsis_thaliana_Columbia_Y2H_igraph_large<-(degree(Arabidopsis_thaliana_Columbia_Y2H_igraph_large))
+degree_yeast_Y2H_igraph_large<-(degree(yeast_Y2H_igraph_large))
+degree_mus_musculus_Y2H_igraph_large<-(degree(mus_musculus_Y2H_igraph_large))
+degree_homo_sapien_TAP_igraph_large<-(degree(homo_sapien_TAP_igraph_large))
+degree_fly_TAP_igraph_large<-(degree(fly_TAP_igraph_large))
+degree_Arabidopsis_thaliana_Columbia_TAP_igraph_large<-(degree(Arabidopsis_thaliana_Columbia_TAP_igraph_large))
+degree_yeast_TAP_igraph_large<-(degree(yeast_TAP_igraph_large))
+degree_mus_musculus_TAP_igraph_large<-(degree(mus_musculus_TAP_igraph_large))
+degree_Schizosaccharomyces_pombe_Y2H_igraph_large<-(degree(Schizosaccharomyces_pombe_Y2H_igraph_large))
+degree_Schizosaccharomyces_pombe_TAP_igraph_large<-(degree(Schizosaccharomyces_pombe_TAP_igraph_large))
+degree_Caenorhabditis_elegans_Y2H_igraph_large<-(degree(Caenorhabditis_elegans_Y2H_igraph_large))
+degree_Caenorhabditis_elegans_TAP_igraph_large<-(degree(Caenorhabditis_elegans_TAP_igraph_large))
+degree_Rattus_norvegicus_Y2H_igraph_large<-(degree(Rattus_norvegicus_Y2H_igraph_large))
+degree_Rattus_norvegicus_TAP_igraph_large<-(degree(Rattus_norvegicus_TAP_igraph_large))
+degree_Candida_albicans_Y2H_igraph_large<-(degree(Candida_albicans_Y2H_igraph_large))
+degree_Candida_albicans_TAP_igraph_large<-(degree(Candida_albicans_TAP_igraph_large))
+
+
+#function for simulated networks shortest path
+simu_net_sp<-function(degree_vec,number){
+  storage<-rep(0,number)
+  for (i in 1:number) {
+    sim_network<-sample_degseq(degree_vec)
+    sim_network<-simplify_graph(sim_network)
+    storage[i]<-average.path.length(sim_network,unconnected = T)
+  }
+  return(storage)
+}
+
+apl_degree_homo_sapien_Y2H_igraph_large<-simu_net_sp(degree_homo_sapien_Y2H_igraph_large,500)
+apl_degree_fly_Y2H_igraph_large<-simu_net_sp(degree_fly_Y2H_igraph_large,500)
+apl_degree_Arabidopsis_thaliana_Columbia_Y2H_igraph_large<-simu_net_sp(degree_Arabidopsis_thaliana_Columbia_Y2H_igraph_large,500)
+apl_degree_yeast_Y2H_igraph_large<-simu_net_sp(degree_yeast_Y2H_igraph_large,500)
+apl_degree_mus_musculus_Y2H_igraph_large<-simu_net_sp(degree_mus_musculus_Y2H_igraph_large,500)
+apl_degree_homo_sapien_TAP_igraph_large<-simu_net_sp(degree_homo_sapien_TAP_igraph_large,500)
+apl_degree_fly_TAP_igraph_large<-simu_net_sp(degree_fly_TAP_igraph_large,500)
+apl_degree_Arabidopsis_thaliana_Columbia_TAP_igraph_large<-simu_net_sp(degree_Arabidopsis_thaliana_Columbia_TAP_igraph_large,500)
+apl_degree_yeast_TAP_igraph_large<-simu_net_sp(degree_yeast_TAP_igraph_large,500)
+apl_degree_mus_musculus_TAP_igraph_large<-simu_net_sp(degree_mus_musculus_TAP_igraph_large,500)
+apl_degree_Schizosaccharomyces_pombe_Y2H_igraph_large<-simu_net_sp(degree_Schizosaccharomyces_pombe_Y2H_igraph_large,500)
+apl_degree_Schizosaccharomyces_pombe_TAP_igraph_large<-simu_net_sp(degree_Schizosaccharomyces_pombe_TAP_igraph_large,500)
+apl_degree_Caenorhabditis_elegans_Y2H_igraph_large<-simu_net_sp(degree_Caenorhabditis_elegans_Y2H_igraph_large,500)
+apl_degree_Caenorhabditis_elegans_TAP_igraph_large<-simu_net_sp(degree_Caenorhabditis_elegans_TAP_igraph_large,500)
+apl_degree_Rattus_norvegicus_Y2H_igraph_large<-simu_net_sp(degree_Rattus_norvegicus_Y2H_igraph_large,500)
+apl_degree_Rattus_norvegicus_TAP_igraph_large<-simu_net_sp(degree_Rattus_norvegicus_TAP_igraph_large,500)
+apl_degree_Candida_albicans_Y2H_igraph_large<-simu_net_sp(degree_Candida_albicans_Y2H_igraph_large,500)
+apl_degree_Candida_albicans_TAP_igraph_large<-simu_net_sp(degree_Candida_albicans_TAP_igraph_large,500)
+
+
+
+apl_list<-list(average.path.length(homo_sapien_Y2H_igraph, unconnected = T),
+               average.path.length(homo_sapien_TAP_igraph, unconnected = T),
+               average.path.length(fly_Y2H_igraph, unconnected = T),
+               average.path.length(fly_TAP_igraph, unconnected = T),
+               average.path.length(Arabidopsis_thaliana_Columbia_Y2H_igraph, unconnected = T),
+               average.path.length(Arabidopsis_thaliana_Columbia_TAP_igraph, unconnected = T),
+               average.path.length(yeast_Y2H_igraph, unconnected = T),
+               average.path.length(yeast_TAP_igraph, unconnected = T),
+               average.path.length(mus_musculus_Y2H_igraph, unconnected = T),
+               average.path.length(mus_musculus_TAP_igraph, unconnected = T),
+               average.path.length(Schizosaccharomyces_pombe_Y2H_igraph, unconnected = T),
+               average.path.length(Schizosaccharomyces_pombe_TAP_igraph, unconnected = T),
+               average.path.length(Caenorhabditis_elegans_Y2H_igraph, unconnected = T),
+               average.path.length(Caenorhabditis_elegans_TAP_igraph, unconnected = T),
+               average.path.length(Rattus_norvegicus_Y2H_igraph, unconnected = T),
+               average.path.length(Rattus_norvegicus_TAP_igraph, unconnected = T),
+               average.path.length(Candida_albicans_Y2H_igraph, unconnected = T),
+               average.path.length(Candida_albicans_TAP_igraph, unconnected = T))
+
+apl_vec<-c(average.path.length(homo_sapien_Y2H_igraph, unconnected = T),
+           average.path.length(homo_sapien_TAP_igraph, unconnected = T),
+           average.path.length(fly_Y2H_igraph, unconnected = T),
+           average.path.length(fly_TAP_igraph, unconnected = T),
+           average.path.length(Arabidopsis_thaliana_Columbia_Y2H_igraph, unconnected = T),
+           average.path.length(Arabidopsis_thaliana_Columbia_TAP_igraph, unconnected = T),
+           average.path.length(yeast_Y2H_igraph, unconnected = T),
+           average.path.length(yeast_TAP_igraph, unconnected = T),
+           average.path.length(mus_musculus_Y2H_igraph, unconnected = T),
+           average.path.length(mus_musculus_TAP_igraph, unconnected = T),
+           average.path.length(Schizosaccharomyces_pombe_Y2H_igraph, unconnected = T),
+           average.path.length(Schizosaccharomyces_pombe_TAP_igraph, unconnected = T),
+           average.path.length(Caenorhabditis_elegans_Y2H_igraph, unconnected = T),
+           average.path.length(Caenorhabditis_elegans_TAP_igraph, unconnected = T),
+           average.path.length(Rattus_norvegicus_Y2H_igraph, unconnected = T),
+           average.path.length(Rattus_norvegicus_TAP_igraph, unconnected = T),
+           average.path.length(Candida_albicans_Y2H_igraph, unconnected = T),
+           average.path.length(Candida_albicans_TAP_igraph, unconnected = T))
+
+sim_apl_list<-list(apl_degree_homo_sapien_Y2H_igraph_large,
+                   apl_degree_homo_sapien_TAP_igraph_large,
+                   apl_degree_fly_Y2H_igraph_large,
+                   apl_degree_fly_TAP_igraph_large,
+                   apl_degree_Arabidopsis_thaliana_Columbia_Y2H_igraph_large,
+                   apl_degree_Arabidopsis_thaliana_Columbia_TAP_igraph_large,
+                   apl_degree_yeast_Y2H_igraph_large,
+                   apl_degree_yeast_TAP_igraph_large,
+                   apl_degree_mus_musculus_Y2H_igraph_large,
+                   apl_degree_mus_musculus_TAP_igraph_large,
+                   apl_degree_Schizosaccharomyces_pombe_Y2H_igraph_large,
+                   apl_degree_Schizosaccharomyces_pombe_TAP_igraph_large,
+                   apl_degree_Caenorhabditis_elegans_Y2H_igraph_large,
+                   apl_degree_Caenorhabditis_elegans_TAP_igraph_large)
+
+
+#Z-test
+#Note this is Not used in the disertation
+#to validate the normality assumption
+qqnorm(apl_degree_homo_sapien_Y2H_igraph_large)
+qqnorm(apl_degree_homo_sapien_TAP_igraph_large)
+qqnorm(apl_degree_fly_Y2H_igraph_large)
+qqnorm(apl_degree_fly_TAP_igraph_large)
+qqnorm(apl_degree_Arabidopsis_thaliana_Columbia_Y2H_igraph_large)
+qqnorm(apl_degree_Arabidopsis_thaliana_Columbia_TAP_igraph_large)
+qqnorm(apl_degree_yeast_Y2H_igraph_large)
+qqnorm(apl_degree_yeast_TAP_igraph_large)
+qqnorm(apl_degree_mus_musculus_Y2H_igraph_large)
+qqnorm(apl_degree_mus_musculus_TAP_igraph_large)
+qqnorm(apl_degree_Schizosaccharomyces_pombe_Y2H_igraph_large)
+qqnorm(apl_degree_Schizosaccharomyces_pombe_TAP_igraph_large)
+qqnorm(apl_degree_Caenorhabditis_elegans_Y2H_igraph_large)
+qqnorm(apl_degree_Caenorhabditis_elegans_TAP_igraph_large)
+
+
+
+z_test<-function(observed_apl,simu_apl_vector){
+  mean_sim_apl<-mean(simu_apl_vector)
+  sd_sim_apl<-sd(simu_apl_vector)
+  return((observed_apl-mean_sim_apl)/sd_sim_apl)
+}
+
+z_test(observed_apl =3 , simu_apl_vector = apl_degree_homo_sapien_TAP_igraph_large)
+
+
+z_results<-rep(0,18)
+for (i in 1:18) {
+  z_results[i]<-z_test(observed_apl = apl_list[[i]],simu_apl_vector = sim_apl_list[[i]])
+}
+Y2H_z_score<-z_results[seq(1,17,2)]
+TAP_z_score<-z_results[seq(2,18,2)]
+whatareu<-matrix(c(Y2H_z_score,TAP_z_score),ncol=2)
+
+
+#Monte Carlo testing
+mont_test<-function(observed_apl,simu_apl_vector){
+  p_value_left<-length(simu_apl_vector[simu_apl_vector<=observed_apl])/length(simu_apl_vector)
+  if(p_value_left<=0.5) return(p_value_left)
+  else return(1-p_value_left)
+}
+
+
+mont_result<-rep(0,14)
+for (i in 1:14) {
+  mont_result[i]<-mont_test(observed_apl = apl_list[[i]],simu_apl_vector = sim_apl_list[[i]])
+}
+Y2H_mont<-mont_result[seq(1,13,2)]
+TAP_mont<-mont_result[seq(2,14,2)]
+Y2H_mont
+TAP_mont
+
+#Produce the boxplot to compare average shortest path length
+Y2H_apl<-apl_vec[seq(1,13,2)]
+TAP_apl<-apl_vec[seq(2,14,2)]
+wilcox.test(Y2H_apl,TAP_apl,paired = F)
+whatareu2<-matrix(c(Y2H_apl,TAP_apl),ncol=2)
+pdf("z_stats.pdf")
+boxplot(whatareu2,ylab="Average shortest path length",names=c("Y2H","TAP"),main="Boxplot of the average shortest path lengths")
+dev.off()
+
+
+#Common vertices and interaction######
+#This section supply for the data quality section
+#it investigate the number of common vertices and common 
+#interactions to both specis PPI networks
+#Also forming a valuable part for the next essential protein analysis
+
+###matching interactions
+matching_interaction<-function(net1,net2){
+  #note the inputs should be igraph
+  net1 <- as.data.frame(get.edgelist(net1))
+  net2 <- as.data.frame(get.edgelist(net2))
+  #find first mtaching sets
+  match1<-match_df(net1,net2)
+  size1<-nrow(match1)
+  #there may be interactions coded in reverse direction
+  #such that col1 to col2 are swapped
+  swap<-net1
+  cha<-swap[,1]
+  swap[,1]<-swap[,2]
+  swap[,2]<-cha
+  match2<-match_df(net2,swap)
+  size2<-nrow(match2)
+  #above may still detect overlapped matched interactions
+  #need to deduct those from the size
+  swap2<-match2
+  cha<-swap2[,1]
+  swap2[,1]<-swap2[,2]
+  swap2[,2]<-cha
+  overlap<-match_df(swap2,match1)
+  size3<-nrow(overlap)
+  return(size1+size2-size3)
+}
+
+#matching proteins
+matching_nodes<-function(net1,net2){
+  deg1<-degree(net1)
+  deg2<-degree(net2)
+  node_1<-names(deg1)
+  node_2<-names(deg2)
+  node_1<-as.numeric(node_1)
+  node_2<-as.numeric(node_2)
+  node_1<-as.data.frame(node_1)
+  node_2<-as.data.frame(node_2)
+  inter<-intersect(node_1$node_1,node_2$node_2)
+  return(length(inter))
+}
+
+#find number of common vertices
+matching_nodes(homo_sapien_TAP_igraph_large,homo_sapien_Y2H_igraph_large)
+matching_nodes(fly_TAP_igraph_large,fly_Y2H_igraph_large)
+matching_nodes(Arabidopsis_thaliana_Columbia_Y2H_igraph_large,Arabidopsis_thaliana_Columbia_TAP_igraph_large)
+matching_nodes(yeast_TAP_igraph_large,yeast_Y2H_igraph_large)
+matching_nodes(mus_musculus_TAP_igraph_large,mus_musculus_Y2H_igraph_large)
+matching_nodes(Schizosaccharomyces_pombe_TAP_igraph_large,Schizosaccharomyces_pombe_Y2H_igraph_large)
+matching_nodes(Caenorhabditis_elegans_TAP_igraph_large,Caenorhabditis_elegans_Y2H_igraph_large)
+
+#find number of common interactions
+matching_interaction(homo_sapien_TAP_igraph_large,homo_sapien_Y2H_igraph_large)
+matching_interaction(fly_TAP_igraph_large,fly_Y2H_igraph_large)
+matching_interaction(Arabidopsis_thaliana_Columbia_Y2H_igraph_large,Arabidopsis_thaliana_Columbia_TAP_igraph_large)
+matching_interaction(yeast_TAP_igraph_large,yeast_Y2H_igraph_large)
+matching_interaction(mus_musculus_TAP_igraph_large,mus_musculus_Y2H_igraph_large)
+matching_interaction(Schizosaccharomyces_pombe_TAP_igraph_large,Schizosaccharomyces_pombe_Y2H_igraph_large)
+matching_interaction(Caenorhabditis_elegans_TAP_igraph_large,Caenorhabditis_elegans_Y2H_igraph_large)
+
+
+
+#local statistics##########
+#This section focuses on producing QQ-plots of some local network
+#statistics
+
+#normalise the local degrees
+normal_human_Y2H<-(unlist(degree(homo_sapien_Y2H_igraph_large))-mean(unlist(degree(homo_sapien_Y2H_igraph_large))))/sd(unlist(degree(homo_sapien_Y2H_igraph_large)))
+normal_human_TAP<-(unlist(degree(homo_sapien_TAP_igraph_large))-mean(unlist(degree(homo_sapien_TAP_igraph_large))))/sd(unlist(degree(homo_sapien_TAP_igraph_large)))
+normal_fly_Y2H<-(unlist(degree(fly_Y2H_igraph_large))-mean(unlist(degree(fly_Y2H_igraph_large))))/sd(unlist(degree(fly_Y2H_igraph_large)))
+normal_fly_TAP<-(unlist(degree(fly_TAP_igraph_large))-mean(unlist(degree(fly_TAP_igraph_large))))/sd(unlist(degree(fly_TAP_igraph_large)))
+normal_rockress_Y2H<-(unlist(degree(Arabidopsis_thaliana_Columbia_Y2H_igraph_large))-mean(unlist(degree(Arabidopsis_thaliana_Columbia_Y2H_igraph_large))))/sd(unlist(degree(Arabidopsis_thaliana_Columbia_Y2H_igraph_large)))
+normal_rockress_TAP<-(unlist(degree(Arabidopsis_thaliana_Columbia_TAP_igraph_large))-mean(unlist(degree(Arabidopsis_thaliana_Columbia_TAP_igraph_large))))/sd(unlist(degree(Arabidopsis_thaliana_Columbia_TAP_igraph_large)))
+normal_yeast_Y2H<-(unlist(degree(yeast_Y2H_igraph_large))-mean(unlist(degree(yeast_Y2H_igraph_large))))/sd(unlist(degree(yeast_Y2H_igraph_large)))
+normal_yeast_TAP<-(unlist(degree(yeast_TAP_igraph_large))-mean(unlist(degree(yeast_TAP_igraph_large))))/sd(unlist(degree(yeast_TAP_igraph_large)))
+normal_mouse_Y2H<-(unlist(degree(mus_musculus_Y2H_igraph_large))-mean(unlist(degree(mus_musculus_Y2H_igraph_large))))/sd(unlist(degree(mus_musculus_Y2H_igraph_large)))
+normal_mouse_TAP<-(unlist(degree(mus_musculus_TAP_igraph_large))-mean(unlist(degree(mus_musculus_TAP_igraph_large))))/sd(unlist(degree(mus_musculus_TAP_igraph_large)))
+normal_fission_yeast_Y2H<-(unlist(degree(Schizosaccharomyces_pombe_Y2H_igraph_large))-mean(unlist(degree(Schizosaccharomyces_pombe_Y2H_igraph_large))))/sd(unlist(degree(Schizosaccharomyces_pombe_Y2H_igraph_large)))
+normal_fission_yeast_TAP<-(unlist(degree(Schizosaccharomyces_pombe_TAP_igraph_large))-mean(unlist(degree(Schizosaccharomyces_pombe_TAP_igraph_large))))/sd(unlist(degree(Schizosaccharomyces_pombe_TAP_igraph_large)))
+normal_round_worm_Y2H<-(unlist(degree(Caenorhabditis_elegans_Y2H_igraph_large))-mean(unlist(degree(Caenorhabditis_elegans_Y2H_igraph_large))))/sd(unlist(degree(Caenorhabditis_elegans_Y2H_igraph_large)))
+normal_round_worm_TAP<-(unlist(degree(Caenorhabditis_elegans_TAP_igraph_large))-mean(unlist(degree(Caenorhabditis_elegans_TAP_igraph_large))))/sd(unlist(degree(Caenorhabditis_elegans_TAP_igraph_large)))
+
+#apply sigmoid to make it on the same scale
+normal_human_Y2H<-sigmoid(normal_human_Y2H)
+normal_human_TAP<-sigmoid(normal_human_TAP)
+normal_fly_Y2H<-sigmoid(normal_fly_Y2H)
+normal_fly_TAP<-sigmoid(normal_fly_TAP)
+normal_rockress_Y2H<-sigmoid(normal_rockress_Y2H)
+normal_rockress_TAP<-sigmoid(normal_rockress_TAP)
+normal_yeast_Y2H<-sigmoid(normal_yeast_Y2H)
+normal_yeast_TAP<-sigmoid(normal_yeast_TAP)
+normal_mouse_Y2H<-sigmoid(normal_mouse_Y2H)
+normal_mouse_TAP<-sigmoid(normal_mouse_TAP)
+normal_fission_yeast_Y2H<-sigmoid(normal_fission_yeast_Y2H)
+normal_fission_yeast_TAP<-sigmoid(normal_fission_yeast_TAP)
+normal_round_worm_Y2H<-sigmoid(normal_round_worm_Y2H)
+normal_round_worm_TAP<-sigmoid(normal_round_worm_TAP)
+
+pdf("qq_degree.pdf")
+par(mfrow=c(3,3))
+qqplot(normal_human_Y2H,normal_human_TAP, main="Human", xlab="Vertices Degree Y2H",ylab="Vertices Degree TAP")
+qqplot(normal_fly_Y2H,normal_fly_TAP, main="Fly", xlab="Vertices Degree Y2H",ylab="Vertices Degree TAP")
+qqplot(normal_rockress_Y2H,normal_rockress_TAP, main="Rockress", xlab="Vertices Degree Y2H",ylab="Vertices Degree TAP")
+qqplot(normal_yeast_Y2H,normal_yeast_TAP, main="Yeast", xlab="Vertices Degree Y2H",ylab="Vertices Degree TAP")
+qqplot(normal_mouse_Y2H,normal_mouse_TAP, main="Mouse", xlab="Vertices Degree Y2H",ylab="Vertices Degree TAP")
+qqplot(normal_fission_yeast_Y2H,normal_fission_yeast_TAP, main="Fission Yeast", xlab="Vertices Degree Y2H",ylab="Vertices Degree TAP")
+qqplot(normal_round_worm_Y2H,normal_round_worm_TAP, main="Round Worm", xlab="Vertices Degree Y2H",ylab="Vertices Degree TAP")
+par(mfrow=c(1,1))
+dev.off()
+
+
+
+#Satrt ploting the local clustering coefficients
+pdf("qq_clustering.pdf")
+par(mfrow=c(3,3))
+qqplot(transitivity(homo_sapien_Y2H_igraph,type = "local"),transitivity(homo_sapien_TAP_igraph,type = "local"), main="Human", xlab="Local Clustering Coefficients of Y2H",ylab="Local Clustering Coefficients of TAP")
+qqplot(transitivity(fly_Y2H_igraph,type = "local"),transitivity(fly_TAP_igraph,type = "local"), main="Fly", xlab="Local Clustering Coefficients of Y2H",ylab="Local Clustering Coefficients of TAP")
+qqplot(transitivity(Arabidopsis_thaliana_Columbia_Y2H_igraph,type = "local"),transitivity(Arabidopsis_thaliana_Columbia_TAP_igraph,type = "local"), main="Rockress", xlab="Local Clustering Coefficients of Y2H",ylab="Local Clustering Coefficients of TAP")
+qqplot(transitivity(yeast_Y2H_igraph,type = "local"),transitivity(yeast_TAP_igraph,type = "local"), main="Yeast", xlab="Local Clustering Coefficients of Y2H",ylab="Local Clustering Coefficients of TAP")
+qqplot(transitivity(mus_musculus_Y2H_igraph,type = "local"),transitivity(mus_musculus_TAP_igraph,type = "local"), main="Mouse", xlab="Local Clustering Coefficients of Y2H",ylab="Local Clustering Coefficients of TAP")
+qqplot(transitivity(Schizosaccharomyces_pombe_Y2H_igraph,type = "local"),transitivity(Schizosaccharomyces_pombe_TAP_igraph,type = "local"), main="Fission Yeast", xlab="Local Clustering Coefficients of Y2H",ylab="Local Clustering Coefficients of TAP")
+qqplot(transitivity(Caenorhabditis_elegans_Y2H_igraph,type = "local"),transitivity(Caenorhabditis_elegans_TAP_igraph,type = "local"), main="Round Worm", xlab="Local Clustering Coefficients of Y2H",ylab="Local Clustering Coefficients of TAP")
+par(mfrow=c(1,1))
+dev.off()
+
+
+
+
+#Essential protein inital analysis#######
+
+#need to load the essential protein data from the DEG
+essen <- read_tsv("F:/oxford dissertation/data organ+code/degannotation-e.dat",
+                  col_names = T,
+                  col_types = "ccccccccccccccccccccccccccccccccccccc",
+                  na = "-")
+#load the essential protein data by species
+yeast_essential<-essen[essen[,8]=="Saccharomyces cerevisiae",][,3]
+Arabidopsis_thaliana_essential<-essen[essen[,8]=="Arabidopsis thaliana",][,3]
+Mus_musculus_essential<-essen[essen[,8]=="Mus musculus",][,3]
+Schizosaccharomyces_pombe_essential<-essen[essen[,8]=="Schizosaccharomyces pombe 972h-",][,3]
+Homo_sapiens_essential<-essen[essen[,8]=="Homo sapiens",][,3]
+Fly_essential<-essen[essen[,8]=="Drosophila melanogaster",][,3]
+
+#need to use data with actual protein name to compare with
+#the essential protein database
+homo_sapien_Y2H_actual <- parse_biogrid_actual_name(route_homo_sapiens, 
+                                                    interspecies = FALSE,
+                                                    loops = FALSE,
+                                                    experimental_system = "Two-hybrid",
+                                                    experimental_system_type = NULL,
+                                                    throughput = NULL)
+
+homo_sapien_TAP_actual <- parse_biogrid_actual_name(route_homo_sapiens, 
+                                                    interspecies = FALSE,
+                                                    loops = FALSE,
+                                                    experimental_system = "Affinity Capture-MS",
+                                                    experimental_system_type = NULL,
+                                                    throughput = NULL)
+
+yeast_Y2H_actual <- parse_biogrid_actual_name(route_yeast, 
+                                              interspecies = FALSE,
+                                              loops = FALSE,
+                                              experimental_system = "Two-hybrid",
+                                              experimental_system_type = NULL,
+                                              throughput = NULL)
+
+yeast_TAP_actual <- parse_biogrid_actual_name(route_yeast, 
+                                              interspecies = FALSE,
+                                              loops = FALSE,
+                                              experimental_system = "Affinity Capture-MS",
+                                              experimental_system_type = NULL,
+                                              throughput = NULL)
+
+fly_Y2H_actual <- parse_biogrid_actual_name(route_fly, 
+                                            interspecies = FALSE,
+                                            loops = FALSE,
+                                            experimental_system = "Two-hybrid",
+                                            experimental_system_type = NULL,
+                                            throughput = NULL)
+
+fly_TAP_actual <- parse_biogrid_actual_name(route_fly, 
+                                            interspecies = FALSE,
+                                            loops = FALSE,
+                                            experimental_system = "Affinity Capture-MS",
+                                            experimental_system_type = NULL,
+                                            throughput = NULL)
+
+Arabidopsis_thaliana_Columbia_Y2H_actual <- parse_biogrid_actual_name(route_Arabidopsis_thaliana_Columbia, 
+                                                                      interspecies = FALSE,
+                                                                      loops = FALSE,
+                                                                      experimental_system = "Two-hybrid",
+                                                                      experimental_system_type = NULL,
+                                                                      throughput = NULL)
+
+Arabidopsis_thaliana_Columbia_TAP_actual <- parse_biogrid_actual_name(route_Arabidopsis_thaliana_Columbia, 
+                                                                      interspecies = FALSE,
+                                                                      loops = FALSE,
+                                                                      experimental_system = "Affinity Capture-MS",
+                                                                      experimental_system_type = NULL,
+                                                                      throughput = NULL)
+
+mus_musculus_Y2H_actual <- parse_biogrid_actual_name(route_mus_musculus, 
+                                                     interspecies = FALSE,
+                                                     loops = FALSE,
+                                                     experimental_system = "Two-hybrid",
+                                                     experimental_system_type = NULL,
+                                                     throughput = NULL)
+
+mus_musculus_TAP_actual <- parse_biogrid_actual_name(route_mus_musculus, 
+                                                     interspecies = FALSE,
+                                                     loops = FALSE,
+                                                     experimental_system = "Affinity Capture-MS",
+                                                     experimental_system_type = NULL,
+                                                     throughput = NULL)
+
+Schizosaccharomyces_pombe_Y2H_actual <- parse_biogrid_actual_name(route_Schizosaccharomyces_pombe, 
+                                                                  interspecies = FALSE,
+                                                                  loops = FALSE,
+                                                                  experimental_system = "Two-hybrid",
+                                                                  experimental_system_type = NULL,
+                                                                  throughput = NULL)
+
+Schizosaccharomyces_pombe_TAP_actual <- parse_biogrid_actual_name(route_Schizosaccharomyces_pombe, 
+                                                                  interspecies = FALSE,
+                                                                  loops = FALSE,
+                                                                  experimental_system = "Affinity Capture-MS",
+                                                                  experimental_system_type = NULL,
+                                                                  throughput = NULL)
+
+Caenorhabditis_elegans_Y2H_actual <- parse_biogrid_actual_name(route_Caenorhabditis_elegans, 
+                                                               interspecies = FALSE,
+                                                               loops = FALSE,
+                                                               experimental_system = "Two-hybrid",
+                                                               experimental_system_type = NULL,
+                                                               throughput = NULL)
+
+Caenorhabditis_elegans_TAP_actual <- parse_biogrid_actual_name(route_Caenorhabditis_elegans, 
+                                                               interspecies = FALSE,
+                                                               loops = FALSE,
+                                                               experimental_system = "Affinity Capture-MS",
+                                                               experimental_system_type = NULL,
+                                                               throughput = NULL)
+
+
+homo_sapien_Y2H_igraph_actual<- graph_from_data_frame(homo_sapien_Y2H_actual, directed=FALSE)
+homo_sapien_TAP_igraph_actual<- graph_from_data_frame(homo_sapien_TAP_actual, directed=FALSE)
+fly_Y2H_igraph_actual<- graph_from_data_frame(fly_Y2H_actual, directed=FALSE)
+fly_TAP_igraph_actual<- graph_from_data_frame(fly_TAP_actual, directed=FALSE)
+Arabidopsis_thaliana_Columbia_Y2H_igraph_actual<- graph_from_data_frame(Arabidopsis_thaliana_Columbia_Y2H_actual, directed=FALSE)
+Arabidopsis_thaliana_Columbia_TAP_igraph_actual<- graph_from_data_frame(Arabidopsis_thaliana_Columbia_TAP_actual, directed=FALSE)
+mus_musculus_Y2H_igraph_actual<- graph_from_data_frame(mus_musculus_Y2H_actual, directed=FALSE)
+mus_musculus_TAP_igraph_actual<- graph_from_data_frame(mus_musculus_TAP_actual, directed=FALSE)
+yeast_Y2H_igraph_actual<- graph_from_data_frame(yeast_Y2H_actual, directed=FALSE)
+yeast_TAP_igraph_actual<- graph_from_data_frame(yeast_TAP_actual, directed=FALSE)
+Schizosaccharomyces_pombe_Y2H_igraph_actual<- graph_from_data_frame(Schizosaccharomyces_pombe_Y2H_actual, directed=FALSE)
+Schizosaccharomyces_pombe_TAP_igraph_actual<- graph_from_data_frame(Schizosaccharomyces_pombe_TAP_actual, directed=FALSE)
+Caenorhabditis_elegans_Y2H_igraph_actual<- graph_from_data_frame(Caenorhabditis_elegans_Y2H_actual, directed=FALSE)
+Caenorhabditis_elegans_TAP_igraph_actual<- graph_from_data_frame(Caenorhabditis_elegans_TAP_actual, directed=FALSE) 
+Rattus_norvegicus_Y2H_igraph_actual<- graph_from_data_frame(Rattus_norvegicus_Y2H_actual, directed=FALSE)
+Rattus_norvegicus_TAP_igraph_actual<- graph_from_data_frame(Rattus_norvegicus_TAP_actual, directed=FALSE) 
+Candida_albicans_Y2H_igraph_actual<- graph_from_data_frame(Candida_albicans_Y2H_actual, directed=FALSE)
+Candida_albicans_TAP_igraph_actual<- graph_from_data_frame(Candida_albicans_TAP_actual, directed=FALSE)
+
+#simplify actual igraphs
+homo_sapien_Y2H_igraph_actual<-simplify_graph(homo_sapien_Y2H_igraph_actual)
+homo_sapien_TAP_igraph_actual<-simplify_graph(homo_sapien_TAP_igraph_actual)
+fly_Y2H_igraph_actual<-simplify_graph(fly_Y2H_igraph_actual)
+fly_TAP_igraph_actual<-simplify_graph(fly_TAP_igraph_actual)
+Arabidopsis_thaliana_Columbia_Y2H_igraph_actual<-simplify_graph(Arabidopsis_thaliana_Columbia_Y2H_igraph_actual)
+Arabidopsis_thaliana_Columbia_TAP_igraph_actual<-simplify_graph(Arabidopsis_thaliana_Columbia_TAP_igraph_actual)
+yeast_Y2H_igraph_actual<-simplify_graph(yeast_Y2H_igraph_actual)
+yeast_TAP_igraph_actual<-simplify_graph(yeast_TAP_igraph_actual)
+mus_musculus_Y2H_igraph_actual<-simplify_graph(mus_musculus_Y2H_igraph_actual)
+mus_musculus_TAP_igraph_actual<-simplify_graph(mus_musculus_TAP_igraph_actual)
+Schizosaccharomyces_pombe_Y2H_igraph_actual<- simplify_graph(Schizosaccharomyces_pombe_Y2H_igraph_actual)
+Schizosaccharomyces_pombe_TAP_igraph_actual<- simplify_graph(Schizosaccharomyces_pombe_TAP_igraph_actual)
+Caenorhabditis_elegans_Y2H_igraph_actual<- simplify_graph(Caenorhabditis_elegans_Y2H_igraph_actual)
+Caenorhabditis_elegans_TAP_igraph_actual<- simplify_graph(Caenorhabditis_elegans_TAP_igraph_actual) 
+Rattus_norvegicus_Y2H_igraph_actual<- simplify_graph(Rattus_norvegicus_Y2H_igraph_actual)
+Rattus_norvegicus_TAP_igraph_actual<- simplify_graph(Rattus_norvegicus_TAP_igraph_actual)
+Candida_albicans_Y2H_igraph_actual<- simplify_graph(Candida_albicans_Y2H_igraph_actual)
+Candida_albicans_TAP_igraph_actual<- simplify_graph(Candida_albicans_TAP_igraph_actual)
+
+#focus only on the largest connected components
+homo_sapien_Y2H_igraph_actual<-getgcc(homo_sapien_Y2H_igraph_actual)
+homo_sapien_TAP_igraph_actual<-getgcc(homo_sapien_TAP_igraph_actual)
+fly_Y2H_igraph_actual<-getgcc(fly_Y2H_igraph_actual)
+fly_TAP_igraph_actual<-getgcc(fly_TAP_igraph_actual)
+Arabidopsis_thaliana_Columbia_Y2H_igraph_actual<-getgcc(Arabidopsis_thaliana_Columbia_Y2H_igraph_actual)
+Arabidopsis_thaliana_Columbia_TAP_igraph_actual<-getgcc(Arabidopsis_thaliana_Columbia_TAP_igraph_actual)
+yeast_Y2H_igraph_actual<-getgcc(yeast_Y2H_igraph_actual)
+yeast_TAP_igraph_actual<-getgcc(yeast_TAP_igraph_actual)
+mus_musculus_Y2H_igraph_actual<-getgcc(mus_musculus_Y2H_igraph_actual)
+mus_musculus_TAP_igraph_actual<-getgcc(mus_musculus_TAP_igraph_actual)
+Schizosaccharomyces_pombe_Y2H_igraph_actual<- getgcc(Schizosaccharomyces_pombe_Y2H_igraph_actual)
+Schizosaccharomyces_pombe_TAP_igraph_actual<- getgcc(Schizosaccharomyces_pombe_TAP_igraph_actual)
+Caenorhabditis_elegans_Y2H_igraph_actual<- getgcc(Caenorhabditis_elegans_Y2H_igraph_actual)
+Caenorhabditis_elegans_TAP_igraph_actual<- getgcc(Caenorhabditis_elegans_TAP_igraph_actual) 
+Rattus_norvegicus_Y2H_igraph_actual<- getgcc(Rattus_norvegicus_Y2H_igraph_actual)
+Rattus_norvegicus_TAP_igraph_actual<- getgcc(Rattus_norvegicus_TAP_igraph_actual)
+Candida_albicans_Y2H_igraph_actual<- getgcc(Candida_albicans_Y2H_igraph_actual)
+Candida_albicans_TAP_igraph_actual<- getgcc(Candida_albicans_TAP_igraph_actual)
+
+
+#a function to output confusion matrix results for degree
+#centrality
+essential_confusion_degree<-function(essen_data,net_data,percentage){
+  essen_data<-as.data.frame(essen_data)
+  essen_data<-as.data.frame(sapply(essen_data, toupper))
+  deg<-degree(net_data)
+  size<-length(deg)
+  sorted_deg<-sort(deg,decreasing = T)
+  
+  #percentage to be a fraction
+  #p
+  essen_protein<-sorted_deg[1:(percentage*size)]
+  essen_protein<-names(essen_protein)
+  essen_protein<-as.data.frame(essen_protein)
+  essen_protein<-as.data.frame(sapply(essen_protein, toupper))
+  
+  #N
+  not_essen_protein<-sorted_deg[(percentage*size):size]
+  not_essen_protein<-names(not_essen_protein)
+  not_essen_protein<-as.data.frame(not_essen_protein)
+  not_essen_protein<-as.data.frame(sapply(not_essen_protein, toupper))
+  
+  proT_essenT <- intersect(essen_protein$essen_protein, essen_data$`#Gene_Ref`)  
+  proT_essenT<-as.data.frame(proT_essenT)
+  proT_essenF<-essen_protein[!(essen_protein[,1] %in% essen_data[,1]),]
+  proT_essenF<-as.data.frame(proT_essenF)
+  proF_essenT<-intersect(not_essen_protein$not_essen_protein,essen_data$`#Gene_Ref`)
+  proF_essenT<-as.data.frame(proF_essenT)
+  all_prot<-as.data.frame(names(sorted_deg))
+  all_match<-match_df(all_prot,essen_data)
+  not_essen_data<-all_prot[!(all_prot[,1] %in% essen_data[,1]),]
+  not_essen_data<-as.data.frame(sapply(not_essen_data, toupper))
+  proF_essenF<-intersect(not_essen_protein$not_essen_protein,not_essen_data$`sapply(not_essen_data, toupper)`)
+  proF_essenF<-as.data.frame(proF_essenF)
+  TP<-nrow(proT_essenT)
+  TN<-nrow(proF_essenF)
+  FP<-nrow(proT_essenF)
+  FN<-nrow(proF_essenT)
+  out<-matrix(c(TP,FP,FN,TN),nrow = 2,ncol=2)
+  return(out)
+}
+
+#define a function to evaluate the six metrics
+six_stats<-function(con_matrix){
+  TP<-con_matrix[1,1]
+  FP<-con_matrix[2,1]
+  FN<-con_matrix[1,2]
+  TN<-con_matrix[2,2]
+  SN<-TP/(TP+FN)
+  SP<-TN/(TN+FP)
+  PPV<-TP/(TP+FP)
+  NPV<-TN/(TN+FN)
+  F_measure<-(2*SN*PPV)/(SN+PPV)
+  ACC<-(TP+TN)/(TP+TN+FP+FN)
+  list(SN,SP,PPV,NPV,F_measure,ACC)
+}
+
+#10%
+yeast_TAP_matrix<-essential_confusion_degree(essen_data = yeast_essential,net_data = yeast_TAP_igraph_actual,percentage = 0.1)
+yeast_Y2H_matrix<-essential_confusion_degree(essen_data = yeast_essential,net_data = yeast_Y2H_igraph_actual,percentage = 0.1)
+homo_sapien_TAP_matrix<-essential_confusion_degree(essen_data = Homo_sapiens_essential,net_data = homo_sapien_TAP_igraph_actual,percentage = 0.1)
+homo_sapien_Y2H_matrix<-essential_confusion_degree(essen_data = Homo_sapiens_essential,net_data = homo_sapien_Y2H_igraph_actual,percentage = 0.1)
+fly_TAP_matrix<-essential_confusion_degree(essen_data = Fly_essential,net_data = fly_TAP_igraph_actual,percentage = 0.1)
+fly_Y2H_matrix<-essential_confusion_degree(essen_data = Fly_essential,net_data = fly_Y2H_igraph_actual,percentage = 0.1)
+Mus_musculus_TAP_matrix<-essential_confusion_degree(essen_data = Mus_musculus_essential,net_data = mus_musculus_TAP_igraph_actual,percentage = 0.1)
+Mus_musculus_Y2H_matrix<-essential_confusion_degree(essen_data = Mus_musculus_essential,net_data = mus_musculus_Y2H_igraph_actual,percentage = 0.1)
+Arabidopsis_thaliana_Columbia_TAP_matrix<-essential_confusion_degree(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_TAP_igraph_actual,percentage = 0.1)
+Arabidopsis_thaliana_Columbia_Y2H_matrix<-essential_confusion_degree(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_Y2H_igraph_actual,percentage = 0.1)
+Schizosaccharomyces_pombe_TAP_matrix<-essential_confusion_degree(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_TAP_igraph_actual,percentage = 0.1)
+Schizosaccharomyces_pombe_Y2H_matrix<-essential_confusion_degree(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_Y2H_igraph_actual,percentage = 0.1)
+
+
+
+#20%
+yeast_TAP_matrix02<-essential_confusion_degree(essen_data = yeast_essential,net_data = yeast_TAP_igraph_actual,percentage = 0.2)
+yeast_Y2H_matrix02<-essential_confusion_degree(essen_data = yeast_essential,net_data = yeast_Y2H_igraph_actual,percentage = 0.2)
+homo_sapien_TAP_matrix02<-essential_confusion_degree(essen_data = Homo_sapiens_essential,net_data = homo_sapien_TAP_igraph_actual,percentage = 0.2)
+homo_sapien_Y2H_matrix02<-essential_confusion_degree(essen_data = Homo_sapiens_essential,net_data = homo_sapien_Y2H_igraph_actual,percentage = 0.2)
+fly_TAP_matrix02<-essential_confusion_degree(essen_data = Fly_essential,net_data = fly_TAP_igraph_actual,percentage = 0.2)
+fly_Y2H_matrix02<-essential_confusion_degree(essen_data = Fly_essential,net_data = fly_Y2H_igraph_actual,percentage = 0.2)
+Mus_musculus_TAP_matrix02<-essential_confusion_degree(essen_data = Mus_musculus_essential,net_data = mus_musculus_TAP_igraph_actual,percentage = 0.2)
+Mus_musculus_Y2H_matrix02<-essential_confusion_degree(essen_data = Mus_musculus_essential,net_data = mus_musculus_Y2H_igraph_actual,percentage = 0.2)
+Arabidopsis_thaliana_Columbia_TAP_matrix02<-essential_confusion_degree(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_TAP_igraph_actual,percentage = 0.2)
+Arabidopsis_thaliana_Columbia_Y2H_matrix02<-essential_confusion_degree(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_Y2H_igraph_actual,percentage = 0.2)
+Schizosaccharomyces_pombe_TAP_matrix02<-essential_confusion_degree(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_TAP_igraph_actual,percentage = 0.2)
+Schizosaccharomyces_pombe_Y2H_matrix02<-essential_confusion_degree(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_Y2H_igraph_actual,percentage = 0.2)
+six_stats(yeast_TAP_matrix02)
+six_stats(yeast_Y2H_matrix02)
+six_stats(homo_sapien_TAP_matrix02)
+six_stats(homo_sapien_Y2H_matrix02)
+six_stats(Mus_musculus_TAP_matrix02)
+six_stats(Mus_musculus_Y2H_matrix02)
+six_stats(Arabidopsis_thaliana_Columbia_TAP_matrix02)
+six_stats(Arabidopsis_thaliana_Columbia_Y2H_matrix02)
+six_stats(Schizosaccharomyces_pombe_TAP_matrix02)
+six_stats(Schizosaccharomyces_pombe_Y2H_matrix02)
+six_stats(fly_TAP_matrix02)
+six_stats(fly_Y2H_matrix02)
+
+
+#10%
+yeast_TAP_matrix<-essential_confusion_degree(essen_data = yeast_essential,net_data = yeast_TAP_igraph_actual,percentage = 0.1)
+yeast_Y2H_matrix<-essential_confusion_degree(essen_data = yeast_essential,net_data = yeast_Y2H_igraph_actual,percentage = 0.1)
+homo_sapien_TAP_matrix<-essential_confusion_degree(essen_data = Homo_sapiens_essential,net_data = homo_sapien_TAP_igraph_actual,percentage = 0.1)
+homo_sapien_Y2H_matrix<-essential_confusion_degree(essen_data = Homo_sapiens_essential,net_data = homo_sapien_Y2H_igraph_actual,percentage = 0.1)
+fly_TAP_matrix<-essential_confusion_degree(essen_data = Fly_essential,net_data = fly_TAP_igraph_actual,percentage = 0.1)
+fly_Y2H_matrix<-essential_confusion_degree(essen_data = Fly_essential,net_data = fly_Y2H_igraph_actual,percentage = 0.1)
+Mus_musculus_TAP_matrix<-essential_confusion_degree(essen_data = Mus_musculus_essential,net_data = mus_musculus_TAP_igraph_actual,percentage = 0.1)
+Mus_musculus_Y2H_matrix<-essential_confusion_degree(essen_data = Mus_musculus_essential,net_data = mus_musculus_Y2H_igraph_actual,percentage = 0.1)
+Arabidopsis_thaliana_Columbia_TAP_matrix<-essential_confusion_degree(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_TAP_igraph_actual,percentage = 0.1)
+Arabidopsis_thaliana_Columbia_Y2H_matrix<-essential_confusion_degree(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_Y2H_igraph_actual,percentage = 0.1)
+Schizosaccharomyces_pombe_TAP_matrix<-essential_confusion_degree(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_TAP_igraph_actual,percentage = 0.1)
+Schizosaccharomyces_pombe_Y2H_matrix<-essential_confusion_degree(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_Y2H_igraph_actual,percentage = 0.1)
+six_stats(yeast_TAP_matrix)
+six_stats(yeast_Y2H_matrix)
+six_stats(homo_sapien_TAP_matrix)
+six_stats(homo_sapien_Y2H_matrix)
+six_stats(Mus_musculus_TAP_matrix)
+six_stats(Mus_musculus_Y2H_matrix)
+six_stats(Arabidopsis_thaliana_Columbia_TAP_matrix)
+six_stats(Arabidopsis_thaliana_Columbia_Y2H_matrix)
+six_stats(Schizosaccharomyces_pombe_TAP_matrix)
+six_stats(Schizosaccharomyces_pombe_Y2H_matrix)
+six_stats(fly_TAP_matrix)
+six_stats(fly_Y2H_matrix)
+
+
+
+
+#5%
+yeast_TAP_matrix005<-essential_confusion_degree(essen_data = yeast_essential,net_data = yeast_TAP_igraph_actual,percentage = 0.05)
+yeast_Y2H_matrix005<-essential_confusion_degree(essen_data = yeast_essential,net_data = yeast_Y2H_igraph_actual,percentage = 0.05)
+homo_sapien_TAP_matrix005<-essential_confusion_degree(essen_data = Homo_sapiens_essential,net_data = homo_sapien_TAP_igraph_actual,percentage = 0.05)
+homo_sapien_Y2H_matrix005<-essential_confusion_degree(essen_data = Homo_sapiens_essential,net_data = homo_sapien_Y2H_igraph_actual,percentage = 0.05)
+fly_TAP_matrix005<-essential_confusion_degree(essen_data = Fly_essential,net_data = fly_TAP_igraph_actual,percentage = 0.05)
+fly_Y2H_matrix005<-essential_confusion_degree(essen_data = Fly_essential,net_data = fly_Y2H_igraph_actual,percentage = 0.05)
+Mus_musculus_TAP_matrix005<-essential_confusion_degree(essen_data = Mus_musculus_essential,net_data = mus_musculus_TAP_igraph_actual,percentage = 0.05)
+Mus_musculus_Y2H_matrix005<-essential_confusion_degree(essen_data = Mus_musculus_essential,net_data = mus_musculus_Y2H_igraph_actual,percentage = 0.05)
+Arabidopsis_thaliana_Columbia_TAP_matrix005<-essential_confusion_degree(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_TAP_igraph_actual,percentage = 0.05)
+Arabidopsis_thaliana_Columbia_Y2H_matrix005<-essential_confusion_degree(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_Y2H_igraph_actual,percentage = 0.05)
+Schizosaccharomyces_pombe_TAP_matrix005<-essential_confusion_degree(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_TAP_igraph_actual,percentage = 0.05)
+Schizosaccharomyces_pombe_Y2H_matrix005<-essential_confusion_degree(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_Y2H_igraph_actual,percentage = 0.05)
+six_stats(yeast_TAP_matrix005)
+six_stats(yeast_Y2H_matrix005)
+six_stats(homo_sapien_TAP_matrix005)
+six_stats(homo_sapien_Y2H_matrix005)
+six_stats(Mus_musculus_TAP_matrix005)
+six_stats(Mus_musculus_Y2H_matrix005)
+six_stats(Arabidopsis_thaliana_Columbia_TAP_matrix005)
+six_stats(Arabidopsis_thaliana_Columbia_Y2H_matrix005)
+six_stats(Schizosaccharomyces_pombe_TAP_matrix005)
+six_stats(Schizosaccharomyces_pombe_Y2H_matrix005)
+six_stats(fly_TAP_matrix005)
+six_stats(fly_Y2H_matrix005)
+
+
+##############transitivity
+
+essential_confusion_transitivity<-function(essen_data,net_data,percentage){
+  essen_data<-as.data.frame(essen_data)
+  essen_data<-as.data.frame(sapply(essen_data, toupper))
+  name_extract<-degree(net_data)
+  nam<-names(name_extract)
+  deg<-transitivity(net_data,type = "local")
+  names(deg)<-nam
+  size<-length(deg)
+  sorted_deg<-sort(deg,decreasing = T)
+  
+  #percentage to be a fraction
+  #p
+  essen_protein<-sorted_deg[1:(percentage*size)]
+  essen_protein<-names(essen_protein)
+  essen_protein<-as.data.frame(essen_protein)
+  essen_protein<-as.data.frame(sapply(essen_protein, toupper))
+  
+  #N
+  not_essen_protein<-sorted_deg[(percentage*size):size]
+  not_essen_protein<-names(not_essen_protein)
+  not_essen_protein<-as.data.frame(not_essen_protein)
+  not_essen_protein<-as.data.frame(sapply(not_essen_protein, toupper))
+  
+  proT_essenT <- intersect(essen_protein$essen_protein, essen_data$`#Gene_Ref`)  
+  proT_essenT<-as.data.frame(proT_essenT)
+  proT_essenF<-essen_protein[!(essen_protein[,1] %in% essen_data[,1]),]
+  proT_essenF<-as.data.frame(proT_essenF)
+  proF_essenT<-intersect(not_essen_protein$not_essen_protein,essen_data$`#Gene_Ref`)
+  proF_essenT<-as.data.frame(proF_essenT)
+  all_prot<-as.data.frame(names(sorted_deg))
+  all_match<-match_df(all_prot,essen_data)
+  not_essen_data<-all_prot[!(all_prot[,1] %in% essen_data[,1]),]
+  not_essen_data<-as.data.frame(sapply(not_essen_data, toupper))
+  proF_essenF<-intersect(not_essen_protein$not_essen_protein,not_essen_data$`sapply(not_essen_data, toupper)`)
+  proF_essenF<-as.data.frame(proF_essenF)
+  TP<-nrow(proT_essenT)
+  TN<-nrow(proF_essenF)
+  FP<-nrow(proT_essenF)
+  FN<-nrow(proF_essenT)
+  out<-matrix(c(TP,FP,FN,TN),nrow = 2,ncol=2)
+  return(out)
+}
+
+#20%
+yeast_TAP_matrix22<-essential_confusion_transitivity(essen_data = yeast_essential,net_data = yeast_TAP_igraph_actual,percentage = 0.2)
+yeast_Y2H_matrix22<-essential_confusion_transitivity(essen_data = yeast_essential,net_data = yeast_Y2H_igraph_actual,percentage = 0.2)
+homo_sapien_TAP_matrix22<-essential_confusion_transitivity(essen_data = Homo_sapiens_essential,net_data = homo_sapien_TAP_igraph_actual,percentage = 0.2)
+homo_sapien_Y2H_matrix22<-essential_confusion_transitivity(essen_data = Homo_sapiens_essential,net_data = homo_sapien_Y2H_igraph_actual,percentage = 0.2)
+fly_TAP_matrix22<-essential_confusion_transitivity(essen_data = Fly_essential,net_data = fly_TAP_igraph_actual,percentage = 0.2)
+fly_Y2H_matrix22<-essential_confusion_transitivity(essen_data = Fly_essential,net_data = fly_Y2H_igraph_actual,percentage = 0.2)
+Mus_musculus_TAP_matrix22<-essential_confusion_transitivity(essen_data = Mus_musculus_essential,net_data = mus_musculus_TAP_igraph_actual,percentage = 0.2)
+Mus_musculus_Y2H_matrix22<-essential_confusion_transitivity(essen_data = Mus_musculus_essential,net_data = mus_musculus_Y2H_igraph_actual,percentage = 0.2)
+Arabidopsis_thaliana_Columbia_TAP_matrix22<-essential_confusion_transitivity(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_TAP_igraph_actual,percentage = 0.2)
+Arabidopsis_thaliana_Columbia_Y2H_matrix22<-essential_confusion_transitivity(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_Y2H_igraph_actual,percentage = 0.2)
+Schizosaccharomyces_pombe_TAP_matrix22<-essential_confusion_transitivity(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_TAP_igraph_actual,percentage = 0.2)
+Schizosaccharomyces_pombe_Y2H_matrix22<-essential_confusion_transitivity(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_Y2H_igraph_actual,percentage = 0.2)
+six_stats(yeast_TAP_matrix22)
+six_stats(yeast_Y2H_matrix22)
+six_stats(homo_sapien_TAP_matrix22)
+six_stats(homo_sapien_Y2H_matrix22)
+six_stats(Mus_musculus_TAP_matrix22)
+six_stats(Mus_musculus_Y2H_matrix22)
+six_stats(Arabidopsis_thaliana_Columbia_TAP_matrix22)
+six_stats(Arabidopsis_thaliana_Columbia_Y2H_matrix22)
+six_stats(Schizosaccharomyces_pombe_TAP_matrix22)
+six_stats(Schizosaccharomyces_pombe_Y2H_matrix22)
+six_stats(fly_TAP_matrix22)
+six_stats(fly_Y2H_matrix22)
+
+
+#10%
+yeast_TAP_matrix2<-essential_confusion_transitivity(essen_data = yeast_essential,net_data = yeast_TAP_igraph_actual,percentage = 0.1)
+yeast_Y2H_matrix2<-essential_confusion_transitivity(essen_data = yeast_essential,net_data = yeast_Y2H_igraph_actual,percentage = 0.1)
+homo_sapien_TAP_matrix2<-essential_confusion_transitivity(essen_data = Homo_sapiens_essential,net_data = homo_sapien_TAP_igraph_actual,percentage = 0.1)
+homo_sapien_Y2H_matrix2<-essential_confusion_transitivity(essen_data = Homo_sapiens_essential,net_data = homo_sapien_Y2H_igraph_actual,percentage = 0.1)
+fly_TAP_matrix2<-essential_confusion_transitivity(essen_data = Fly_essential,net_data = fly_TAP_igraph_actual,percentage = 0.1)
+fly_Y2H_matrix2<-essential_confusion_transitivity(essen_data = Fly_essential,net_data = fly_Y2H_igraph_actual,percentage = 0.1)
+Mus_musculus_TAP_matrix2<-essential_confusion_transitivity(essen_data = Mus_musculus_essential,net_data = mus_musculus_TAP_igraph_actual,percentage = 0.1)
+Mus_musculus_Y2H_matrix2<-essential_confusion_transitivity(essen_data = Mus_musculus_essential,net_data = mus_musculus_Y2H_igraph_actual,percentage = 0.1)
+Arabidopsis_thaliana_Columbia_TAP_matrix2<-essential_confusion_transitivity(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_TAP_igraph_actual,percentage = 0.1)
+Arabidopsis_thaliana_Columbia_Y2H_matrix2<-essential_confusion_transitivity(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_Y2H_igraph_actual,percentage = 0.1)
+Schizosaccharomyces_pombe_TAP_matrix2<-essential_confusion_transitivity(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_TAP_igraph_actual,percentage = 0.1)
+Schizosaccharomyces_pombe_Y2H_matrix2<-essential_confusion_transitivity(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_Y2H_igraph_actual,percentage = 0.1)
+six_stats(yeast_TAP_matrix2)
+six_stats(yeast_Y2H_matrix2)
+six_stats(homo_sapien_TAP_matrix2)
+six_stats(homo_sapien_Y2H_matrix2)
+six_stats(Mus_musculus_TAP_matrix2)
+six_stats(Mus_musculus_Y2H_matrix2)
+six_stats(Arabidopsis_thaliana_Columbia_TAP_matrix2)
+six_stats(Arabidopsis_thaliana_Columbia_Y2H_matrix2)
+six_stats(Schizosaccharomyces_pombe_TAP_matrix2)
+six_stats(Schizosaccharomyces_pombe_Y2H_matrix2)
+six_stats(fly_TAP_matrix2)
+six_stats(fly_Y2H_matrix2)
+
+#5%
+yeast_TAP_matrix205<-essential_confusion_transitivity(essen_data = yeast_essential,net_data = yeast_TAP_igraph_actual,percentage = 0.05)
+yeast_Y2H_matrix205<-essential_confusion_transitivity(essen_data = yeast_essential,net_data = yeast_Y2H_igraph_actual,percentage = 0.05)
+homo_sapien_TAP_matrix205<-essential_confusion_transitivity(essen_data = Homo_sapiens_essential,net_data = homo_sapien_TAP_igraph_actual,percentage = 0.05)
+homo_sapien_Y2H_matrix205<-essential_confusion_transitivity(essen_data = Homo_sapiens_essential,net_data = homo_sapien_Y2H_igraph_actual,percentage = 0.05)
+fly_TAP_matrix205<-essential_confusion_transitivity(essen_data = Fly_essential,net_data = fly_TAP_igraph_actual,percentage = 0.05)
+fly_Y2H_matrix205<-essential_confusion_transitivity(essen_data = Fly_essential,net_data = fly_Y2H_igraph_actual,percentage = 0.05)
+Mus_musculus_TAP_matrix205<-essential_confusion_transitivity(essen_data = Mus_musculus_essential,net_data = mus_musculus_TAP_igraph_actual,percentage = 0.05)
+Mus_musculus_Y2H_matrix205<-essential_confusion_transitivity(essen_data = Mus_musculus_essential,net_data = mus_musculus_Y2H_igraph_actual,percentage = 0.05)
+Arabidopsis_thaliana_Columbia_TAP_matrix205<-essential_confusion_transitivity(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_TAP_igraph_actual,percentage = 0.05)
+Arabidopsis_thaliana_Columbia_Y2H_matrix205<-essential_confusion_transitivity(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_Y2H_igraph_actual,percentage = 0.05)
+Schizosaccharomyces_pombe_TAP_matrix205<-essential_confusion_transitivity(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_TAP_igraph_actual,percentage = 0.05)
+Schizosaccharomyces_pombe_Y2H_matrix205<-essential_confusion_transitivity(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_Y2H_igraph_actual,percentage = 0.05)
+six_stats(yeast_TAP_matrix205)
+six_stats(yeast_Y2H_matrix205)
+six_stats(homo_sapien_TAP_matrix205)
+six_stats(homo_sapien_Y2H_matrix205)
+six_stats(Mus_musculus_TAP_matrix205)
+six_stats(Mus_musculus_Y2H_matrix205)
+six_stats(Arabidopsis_thaliana_Columbia_TAP_matrix205)
+six_stats(Arabidopsis_thaliana_Columbia_Y2H_matrix205)
+six_stats(Schizosaccharomyces_pombe_TAP_matrix205)
+six_stats(Schizosaccharomyces_pombe_Y2H_matrix205)
+six_stats(fly_TAP_matrix205)
+six_stats(fly_Y2H_matrix205)
+
+
+###############closness centrality
+essential_confusion_closeness<-function(essen_data,net_data,percentage){
+  essen_data<-as.data.frame(essen_data)
+  essen_data<-as.data.frame(sapply(essen_data, toupper))
+  name_extract<-closeness(net_data)
+  nam<-names(name_extract)
+  deg<-transitivity(net_data,type = "local")
+  names(deg)<-nam
+  size<-length(deg)
+  sorted_deg<-sort(deg,decreasing = T)
+  
+  #percentage to be a fraction
+  #p
+  essen_protein<-sorted_deg[1:(percentage*size)]
+  essen_protein<-names(essen_protein)
+  essen_protein<-as.data.frame(essen_protein)
+  essen_protein<-as.data.frame(sapply(essen_protein, toupper))
+  
+  #N
+  not_essen_protein<-sorted_deg[(percentage*size):size]
+  not_essen_protein<-names(not_essen_protein)
+  not_essen_protein<-as.data.frame(not_essen_protein)
+  not_essen_protein<-as.data.frame(sapply(not_essen_protein, toupper))
+  
+  proT_essenT <- intersect(essen_protein$essen_protein, essen_data$`#Gene_Ref`)  
+  proT_essenT<-as.data.frame(proT_essenT)
+  proT_essenF<-essen_protein[!(essen_protein[,1] %in% essen_data[,1]),]
+  proT_essenF<-as.data.frame(proT_essenF)
+  proF_essenT<-intersect(not_essen_protein$not_essen_protein,essen_data$`#Gene_Ref`)
+  proF_essenT<-as.data.frame(proF_essenT)
+  all_prot<-as.data.frame(names(sorted_deg))
+  all_match<-match_df(all_prot,essen_data)
+  not_essen_data<-all_prot[!(all_prot[,1] %in% essen_data[,1]),]
+  not_essen_data<-as.data.frame(sapply(not_essen_data, toupper))
+  proF_essenF<-intersect(not_essen_protein$not_essen_protein,not_essen_data$`sapply(not_essen_data, toupper)`)
+  proF_essenF<-as.data.frame(proF_essenF)
+  TP<-nrow(proT_essenT)
+  TN<-nrow(proF_essenF)
+  FP<-nrow(proT_essenF)
+  FN<-nrow(proF_essenT)
+  out<-matrix(c(TP,FP,FN,TN),nrow = 2,ncol=2)
+  return(out)
+}
+
+
+#20%
+yeast_TAP_matrix2c20<-essential_confusion_closeness(essen_data = yeast_essential,net_data = yeast_TAP_igraph_actual,percentage = 0.2)
+yeast_Y2H_matrix2c20<-essential_confusion_closeness(essen_data = yeast_essential,net_data = yeast_Y2H_igraph_actual,percentage = 0.2)
+homo_sapien_TAP_matrix2c20<-essential_confusion_closeness(essen_data = Homo_sapiens_essential,net_data = homo_sapien_TAP_igraph_actual,percentage = 0.2)
+homo_sapien_Y2H_matrix2c20<-essential_confusion_closeness(essen_data = Homo_sapiens_essential,net_data = homo_sapien_Y2H_igraph_actual,percentage = 0.2)
+fly_TAP_matrix2c20<-essential_confusion_closeness(essen_data = Fly_essential,net_data = fly_TAP_igraph_actual,percentage = 0.2)
+fly_Y2H_matrix2c20<-essential_confusion_closeness(essen_data = Fly_essential,net_data = fly_Y2H_igraph_actual,percentage = 0.2)
+Mus_musculus_TAP_matrix2c20<-essential_confusion_closeness(essen_data = Mus_musculus_essential,net_data = mus_musculus_TAP_igraph_actual,percentage = 0.2)
+Mus_musculus_Y2H_matrix2c20<-essential_confusion_closeness(essen_data = Mus_musculus_essential,net_data = mus_musculus_Y2H_igraph_actual,percentage = 0.2)
+Arabidopsis_thaliana_Columbia_TAP_matrix2c20<-essential_confusion_closeness(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_TAP_igraph_actual,percentage = 0.2)
+Arabidopsis_thaliana_Columbia_Y2H_matrix2c20<-essential_confusion_closeness(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_Y2H_igraph_actual,percentage = 0.2)
+Schizosaccharomyces_pombe_TAP_matrix2c20<-essential_confusion_closeness(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_TAP_igraph_actual,percentage = 0.2)
+Schizosaccharomyces_pombe_Y2H_matrix2c20<-essential_confusion_closeness(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_Y2H_igraph_actual,percentage = 0.2)
+six_stats(yeast_TAP_matrix2c20)
+six_stats(yeast_Y2H_matrix2c20)
+six_stats(homo_sapien_TAP_matrix2c20)
+six_stats(homo_sapien_Y2H_matrix2c20)
+six_stats(Mus_musculus_TAP_matrix2c20)
+six_stats(Mus_musculus_Y2H_matrix2c20)
+six_stats(Arabidopsis_thaliana_Columbia_TAP_matrix2c20)
+six_stats(Arabidopsis_thaliana_Columbia_Y2H_matrix2c20)
+six_stats(Schizosaccharomyces_pombe_TAP_matrix2c20)
+six_stats(Schizosaccharomyces_pombe_Y2H_matrix2c20)
+six_stats(fly_TAP_matrix2c20)
+six_stats(fly_Y2H_matrix2c20)
+
+#10%
+yeast_TAP_matrix2c<-essential_confusion_closeness(essen_data = yeast_essential,net_data = yeast_TAP_igraph_actual,percentage = 0.1)
+yeast_Y2H_matrix2c<-essential_confusion_closeness(essen_data = yeast_essential,net_data = yeast_Y2H_igraph_actual,percentage = 0.1)
+homo_sapien_TAP_matrix2c<-essential_confusion_closeness(essen_data = Homo_sapiens_essential,net_data = homo_sapien_TAP_igraph_actual,percentage = 0.1)
+homo_sapien_Y2H_matrix2c<-essential_confusion_closeness(essen_data = Homo_sapiens_essential,net_data = homo_sapien_Y2H_igraph_actual,percentage = 0.1)
+fly_TAP_matrix2c<-essential_confusion_closeness(essen_data = Fly_essential,net_data = fly_TAP_igraph_actual,percentage = 0.1)
+fly_Y2H_matrix2c<-essential_confusion_closeness(essen_data = Fly_essential,net_data = fly_Y2H_igraph_actual,percentage = 0.1)
+Mus_musculus_TAP_matrix2c<-essential_confusion_closeness(essen_data = Mus_musculus_essential,net_data = mus_musculus_TAP_igraph_actual,percentage = 0.1)
+Mus_musculus_Y2H_matrix2c<-essential_confusion_closeness(essen_data = Mus_musculus_essential,net_data = mus_musculus_Y2H_igraph_actual,percentage = 0.1)
+Arabidopsis_thaliana_Columbia_TAP_matrix2c<-essential_confusion_closeness(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_TAP_igraph_actual,percentage = 0.1)
+Arabidopsis_thaliana_Columbia_Y2H_matrix2c<-essential_confusion_closeness(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_Y2H_igraph_actual,percentage = 0.1)
+Schizosaccharomyces_pombe_TAP_matrix2c<-essential_confusion_closeness(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_TAP_igraph_actual,percentage = 0.1)
+Schizosaccharomyces_pombe_Y2H_matrix2c<-essential_confusion_closeness(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_Y2H_igraph_actual,percentage = 0.1)
+six_stats(yeast_TAP_matrix2c)
+six_stats(yeast_Y2H_matrix2c)
+six_stats(homo_sapien_TAP_matrix2c)
+six_stats(homo_sapien_Y2H_matrix2c)
+six_stats(Mus_musculus_TAP_matrix2c)
+six_stats(Mus_musculus_Y2H_matrix2c)
+six_stats(Arabidopsis_thaliana_Columbia_TAP_matrix2c)
+six_stats(Arabidopsis_thaliana_Columbia_Y2H_matrix2c)
+six_stats(Schizosaccharomyces_pombe_TAP_matrix2c)
+six_stats(Schizosaccharomyces_pombe_Y2H_matrix2c)
+six_stats(fly_TAP_matrix2c)
+six_stats(fly_Y2H_matrix2c)
+
+
+#5%
+yeast_TAP_matrix2c5<-essential_confusion_closeness(essen_data = yeast_essential,net_data = yeast_TAP_igraph_actual,percentage = 0.05)
+yeast_Y2H_matrix2c5<-essential_confusion_closeness(essen_data = yeast_essential,net_data = yeast_Y2H_igraph_actual,percentage = 0.05)
+homo_sapien_TAP_matrix2c5<-essential_confusion_closeness(essen_data = Homo_sapiens_essential,net_data = homo_sapien_TAP_igraph_actual,percentage = 0.05)
+homo_sapien_Y2H_matrix2c5<-essential_confusion_closeness(essen_data = Homo_sapiens_essential,net_data = homo_sapien_Y2H_igraph_actual,percentage = 0.05)
+fly_TAP_matrix2c5<-essential_confusion_closeness(essen_data = Fly_essential,net_data = fly_TAP_igraph_actual,percentage = 0.05)
+fly_Y2H_matrix2c5<-essential_confusion_closeness(essen_data = Fly_essential,net_data = fly_Y2H_igraph_actual,percentage = 0.05)
+Mus_musculus_TAP_matrix2c5<-essential_confusion_closeness(essen_data = Mus_musculus_essential,net_data = mus_musculus_TAP_igraph_actual,percentage = 0.05)
+Mus_musculus_Y2H_matrix2c5<-essential_confusion_closeness(essen_data = Mus_musculus_essential,net_data = mus_musculus_Y2H_igraph_actual,percentage = 0.05)
+Arabidopsis_thaliana_Columbia_TAP_matrix2c5<-essential_confusion_closeness(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_TAP_igraph_actual,percentage = 0.05)
+Arabidopsis_thaliana_Columbia_Y2H_matrix2c5<-essential_confusion_closeness(essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_Y2H_igraph_actual,percentage = 0.05)
+Schizosaccharomyces_pombe_TAP_matrix2c5<-essential_confusion_closeness(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_TAP_igraph_actual,percentage = 0.05)
+Schizosaccharomyces_pombe_Y2H_matrix2c5<-essential_confusion_closeness(essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_Y2H_igraph_actual,percentage = 0.05)
+six_stats(yeast_TAP_matrix2c5)
+six_stats(yeast_Y2H_matrix2c5)
+six_stats(homo_sapien_TAP_matrix2c5)
+six_stats(homo_sapien_Y2H_matrix2c5)
+six_stats(Mus_musculus_TAP_matrix2c5)
+six_stats(Mus_musculus_Y2H_matrix2c5)
+six_stats(Arabidopsis_thaliana_Columbia_TAP_matrix2c5)
+six_stats(Arabidopsis_thaliana_Columbia_Y2H_matrix2c5)
+six_stats(Schizosaccharomyces_pombe_TAP_matrix2c5)
+six_stats(Schizosaccharomyces_pombe_Y2H_matrix2c5)
+six_stats(fly_TAP_matrix2c5)
+six_stats(fly_Y2H_matrix2c5)
+
+
+
+#Essential Protein AUC(Not Used)#######
+###AUC
+ROC_curve_degree<-function(set_of_value, essen_data,net_data){
+  mat_list<-lapply(set_of_value, function(x){
+    essential_confusion_degree(essen_data = essen_data,net_data=net_data,percentage = x)})
+  #initialise TP vector
+  TP_vec<-rep(0,length(set_of_value))
+  for (i in 1:length(set_of_value)) {
+    TP_vec[i]<-mat_list[[i]][1,1]
+  }
+  FN_vec<-rep(0,length(set_of_value))
+  for (i in 1:length(set_of_value)) {
+    FN_vec[i]<-mat_list[[i]][1,2]
+  }
+  TN_vec<-rep(0,length(set_of_value))
+  for (i in 1:length(set_of_value)) {
+    TN_vec[i]<-mat_list[[i]][2,2]
+  }
+  FP_vec<-rep(0,length(set_of_value))
+  for (i in 1:length(set_of_value)) {
+    FP_vec[i]<-mat_list[[i]][2,1]
+  }
+  FP_rate<-FP_vec/(FP_vec+TN_vec)
+  TP_rate<-TP_vec/(TP_vec+FN_vec)
+  return(list(FP_rate,TP_rate))
+}
+#calculate ROC curves
+ROC_Schizosaccharomyces_pombe_TAP_degree<-ROC_curve_degree(seq(0,1,0.001),essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_TAP_igraph_actual)
+ROC_Schizosaccharomyces_pombe_Y2H_degree<-ROC_curve_degree(seq(0,1,0.001),essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_Y2H_igraph_actual)
+ROC_homo_sapien_TAP_degree<-ROC_curve_degree(seq(0,1,0.001),essen_data = Homo_sapiens_essential,net_data = homo_sapien_TAP_igraph_actual)
+ROC_homo_sapien_Y2H_degree<-ROC_curve_degree(seq(0,1,0.001),essen_data = Homo_sapiens_essential,net_data = homo_sapien_Y2H_igraph_actual)
+ROC_yeast_TAP_degree<-ROC_curve_degree(seq(0,1,0.001),essen_data = yeast_essential,net_data = yeast_TAP_igraph_actual)
+ROC_yeast_Y2H_degree<-ROC_curve_degree(seq(0,1,0.001),essen_data = yeast_essential,net_data = yeast_Y2H_igraph_actual)
+ROC_fly_TAP_degree<-ROC_curve_degree(seq(0,1,0.001),essen_data = Fly_essential,net_data = fly_TAP_igraph_actual)
+ROC_fly_Y2H_degree<-ROC_curve_degree(seq(0,1,0.001),essen_data = Fly_essential,net_data = fly_Y2H_igraph_actual)
+ROC_Arabidopsis_thaliana_TAP_degree<-ROC_curve_degree(seq(0,1,0.001),essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_TAP_igraph_actual)
+ROC_Arabidopsis_thaliana_Y2H_degree<-ROC_curve_degree(seq(0,1,0.001),essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_Y2H_igraph_actual)
+ROC_Mus_musculus_TAP_degree<-ROC_curve_degree(seq(0,1,0.001),essen_data = Mus_musculus_essential,net_data = mus_musculus_TAP_igraph_actual)
+ROC_Mus_musculus_Y2H_degree<-ROC_curve_degree(seq(0,1,0.001),essen_data = Mus_musculus_essential,net_data = mus_musculus_Y2H_igraph_actual)
+
+
+AUC_approx<-function(ROC){
+  size<-length(ROC[[1]])-1
+  #initialise a vector to store areas
+  area<-rep(0,size)
+  #approximate by trapizium sizes
+  for (i in 1:size) {
+    area[i]<-((ROC[[2]][i])+(ROC[[2]][i+1]))*(ROC[[1]][i+1]-ROC[[1]][i])/2
+  }
+  return(sum(area))
+}
+
+AUC_approx(ROC_Schizosaccharomyces_pombe_TAP_degree)
+AUC_approx(ROC_Schizosaccharomyces_pombe_Y2H_degree)
+AUC_approx(ROC_homo_sapien_TAP_degree)
+AUC_approx(ROC_homo_sapien_Y2H_degree)
+AUC_approx(ROC_yeast_TAP_degree)
+AUC_approx(ROC_yeast_Y2H_degree)
+AUC_approx(ROC_fly_TAP_degree)
+AUC_approx(ROC_fly_Y2H_degree)
+AUC_approx(ROC_Arabidopsis_thaliana_TAP_degree)
+AUC_approx(ROC_Arabidopsis_thaliana_Y2H_degree)
+AUC_approx(ROC_Mus_musculus_TAP_degree)
+AUC_approx(ROC_Mus_musculus_Y2H_degree)
+
+
+
+#transitivity auc
+ROC_curve_transitivity<-function(set_of_value, essen_data,net_data){
+  mat_list<-lapply(set_of_value, function(x){
+    essential_confusion_transitivity(essen_data = essen_data,net_data=net_data,percentage = x)})
+  #initialise TP vector
+  TP_vec<-rep(0,length(set_of_value))
+  for (i in 1:length(set_of_value)) {
+    TP_vec[i]<-mat_list[[i]][1,1]
+  }
+  FN_vec<-rep(0,length(set_of_value))
+  for (i in 1:length(set_of_value)) {
+    FN_vec[i]<-mat_list[[i]][1,2]
+  }
+  TN_vec<-rep(0,length(set_of_value))
+  for (i in 1:length(set_of_value)) {
+    TN_vec[i]<-mat_list[[i]][2,2]
+  }
+  FP_vec<-rep(0,length(set_of_value))
+  for (i in 1:length(set_of_value)) {
+    FP_vec[i]<-mat_list[[i]][2,1]
+  }
+  FP_rate<-FP_vec/(FP_vec+TN_vec)
+  TP_rate<-TP_vec/(TP_vec+FN_vec)
+  return(list(FP_rate,TP_rate))
+}
+#calculate ROC curves
+ROC_Schizosaccharomyces_pombe_TAP_transitivity<-ROC_curve_transitivity(seq(0,1,0.001),essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_TAP_igraph_actual)
+ROC_Schizosaccharomyces_pombe_Y2H_transitivity<-ROC_curve_transitivity(seq(0,1,0.001),essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_Y2H_igraph_actual)
+ROC_homo_sapien_TAP_transitivity<-ROC_curve_transitivity(seq(0,1,0.001),essen_data = Homo_sapiens_essential,net_data = homo_sapien_TAP_igraph_actual)
+ROC_homo_sapien_Y2H_transitivity<-ROC_curve_transitivity(seq(0,1,0.001),essen_data = Homo_sapiens_essential,net_data = homo_sapien_Y2H_igraph_actual)
+ROC_yeast_TAP_transitivity<-ROC_curve_transitivity(seq(0,1,0.001),essen_data = yeast_essential,net_data = yeast_TAP_igraph_actual)
+ROC_yeast_Y2H_transitivity<-ROC_curve_transitivity(seq(0,1,0.001),essen_data = yeast_essential,net_data = yeast_Y2H_igraph_actual)
+ROC_fly_TAP_transitivity<-ROC_curve_transitivity(seq(0,1,0.001),essen_data = Fly_essential,net_data = fly_TAP_igraph_actual)
+ROC_fly_Y2H_transitivity<-ROC_curve_transitivity(seq(0,1,0.001),essen_data = Fly_essential,net_data = fly_Y2H_igraph_actual)
+ROC_Arabidopsis_thaliana_TAP_transitivity<-ROC_curve_transitivity(seq(0,1,0.001),essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_TAP_igraph_actual)
+ROC_Arabidopsis_thaliana_Y2H_transitivity<-ROC_curve_transitivity(seq(0,1,0.001),essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_Y2H_igraph_actual)
+ROC_Mus_musculus_TAP_transitivity<-ROC_curve_transitivity(seq(0,1,0.001),essen_data = Mus_musculus_essential,net_data = mus_musculus_TAP_igraph_actual)
+ROC_Mus_musculus_Y2H_transitivity<-ROC_curve_transitivity(seq(0,1,0.001),essen_data = Mus_musculus_essential,net_data = mus_musculus_Y2H_igraph_actual)
+
+#AUC calculation
+AUC_approx(ROC_Schizosaccharomyces_pombe_TAP_transitivity)
+AUC_approx(ROC_Schizosaccharomyces_pombe_Y2H_transitivity)
+AUC_approx(ROC_homo_sapien_TAP_transitivity)
+AUC_approx(ROC_homo_sapien_Y2H_transitivity)
+AUC_approx(ROC_yeast_TAP_transitivity)
+AUC_approx(ROC_yeast_Y2H_transitivity)
+AUC_approx(ROC_fly_TAP_transitivity)
+AUC_approx(ROC_fly_Y2H_transitivity)
+AUC_approx(ROC_Arabidopsis_thaliana_TAP_transitivity)
+AUC_approx(ROC_Arabidopsis_thaliana_Y2H_transitivity)
+AUC_approx(ROC_Mus_musculus_TAP_transitivity)
+AUC_approx(ROC_Mus_musculus_Y2H_transitivity)
+
+
+plot(ROC_fly_TAP_transitivity[[1]],ROC_fly_Y2H_transitivity[[2]])
+
+#closness
+closeness(fly_TAP_igraph_actual)
+ROC_curve_closeness<-function(set_of_value, essen_data,net_data){
+  mat_list<-lapply(set_of_value, function(x){
+    essential_confusion_closeness(essen_data = essen_data,net_data=net_data,percentage = x)})
+  #initialise TP vector
+  TP_vec<-rep(0,length(set_of_value))
+  for (i in 1:length(set_of_value)) {
+    TP_vec[i]<-mat_list[[i]][1,1]
+  }
+  FN_vec<-rep(0,length(set_of_value))
+  for (i in 1:length(set_of_value)) {
+    FN_vec[i]<-mat_list[[i]][1,2]
+  }
+  TN_vec<-rep(0,length(set_of_value))
+  for (i in 1:length(set_of_value)) {
+    TN_vec[i]<-mat_list[[i]][2,2]
+  }
+  FP_vec<-rep(0,length(set_of_value))
+  for (i in 1:length(set_of_value)) {
+    FP_vec[i]<-mat_list[[i]][2,1]
+  }
+  FP_rate<-FP_vec/(FP_vec+TN_vec)
+  TP_rate<-TP_vec/(TP_vec+FN_vec)
+  return(list(FP_rate,TP_rate))
+}
+
+ROC_Schizosaccharomyces_pombe_TAP_closeness<-ROC_curve_closeness(seq(0,1,0.01),essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_TAP_igraph_actual)
+ROC_Schizosaccharomyces_pombe_Y2H_closeness<-ROC_curve_closeness(seq(0,1,0.01),essen_data = Schizosaccharomyces_pombe_essential,net_data = Schizosaccharomyces_pombe_Y2H_igraph_actual)
+ROC_homo_sapien_TAP_closeness<-ROC_curve_closeness(seq(0,1,0.01),essen_data = Homo_sapiens_essential,net_data = homo_sapien_TAP_igraph_actual)
+ROC_homo_sapien_Y2H_closeness<-ROC_curve_closeness(seq(0,1,0.01),essen_data = Homo_sapiens_essential,net_data = homo_sapien_Y2H_igraph_actual)
+ROC_yeast_TAP_closeness<-ROC_curve_closeness(seq(0,1,0.01),essen_data = yeast_essential,net_data = yeast_TAP_igraph_actual)
+ROC_yeast_Y2H_closeness<-ROC_curve_closeness(seq(0,1,0.01),essen_data = yeast_essential,net_data = yeast_Y2H_igraph_actual)
+ROC_fly_TAP_closeness<-ROC_curve_closeness(seq(0,1,0.01),essen_data = Fly_essential,net_data = fly_TAP_igraph_actual)
+ROC_fly_Y2H_closeness<-ROC_curve_closeness(seq(0,1,0.01),essen_data = Fly_essential,net_data = fly_Y2H_igraph_actual)
+ROC_Arabidopsis_thaliana_TAP_closeness<-ROC_curve_closeness(seq(0,1,0.01),essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_TAP_igraph_actual)
+ROC_Arabidopsis_thaliana_Y2H_closeness<-ROC_curve_closeness(seq(0,1,0.01),essen_data = Arabidopsis_thaliana_essential,net_data = Arabidopsis_thaliana_Columbia_Y2H_igraph_actual)
+ROC_Mus_musculus_TAP_closeness<-ROC_curve_closeness(seq(0,1,0.01),essen_data = Mus_musculus_essential,net_data = mus_musculus_TAP_igraph_actual)
+ROC_Mus_musculus_Y2H_closeness<-ROC_curve_closeness(seq(0,1,0.01),essen_data = Mus_musculus_essential,net_data = mus_musculus_Y2H_igraph_actual)
+
+#AUC calculation
+AUC_approx(ROC_Schizosaccharomyces_pombe_TAP_closeness)
+AUC_approx(ROC_Schizosaccharomyces_pombe_Y2H_closeness)
+AUC_approx(ROC_homo_sapien_TAP_closeness)
+AUC_approx(ROC_homo_sapien_Y2H_closeness)
+AUC_approx(ROC_yeast_TAP_closeness)
+AUC_approx(ROC_yeast_Y2H_closeness)
+AUC_approx(ROC_fly_TAP_closeness)
+AUC_approx(ROC_fly_Y2H_closeness)
+AUC_approx(ROC_Arabidopsis_thaliana_TAP_closeness)
+AUC_approx(ROC_Arabidopsis_thaliana_Y2H_closeness)
+AUC_approx(ROC_Mus_musculus_TAP_closeness)
+AUC_approx(ROC_Mus_musculus_Y2H_closeness)
+
+
+
+#Essential protein logistic regression#####
+#This section considers two modeling section
+#one is for using TAP or Y2H data alone to perform prediction
+#two is to compare between 1)weighting experimental evidence with
+#2)combining interaction with equal weights
+
+#Logistic model 1####
+#model 1
+#Model 1 considers individual Y2H and TAP models. Therefore,
+#it starts with a function to generate the data frames 
+#for such model.
+
+logistic_data<-function(essen_data,net_data_Y2H,net_data_TAP){
+  #essen_data should be dataframe
+  #the two network data should be igraph
+  essen_data<-as.data.frame(essen_data)
+  essen_data<-as.data.frame(sapply(essen_data, toupper))
+  #now extract out protein names and explanatory variables
+  #first using only the matching nodes
+  deg_Y2H<-degree(net_data_Y2H)
+  deg_TAP<-degree(net_data_TAP)
+  deg_Y2H<-(deg_Y2H-mean(deg_Y2H))/sd(deg_Y2H)
+  deg_TAP<-(deg_TAP-mean(deg_TAP))/sd(deg_TAP)
+  node_deg_Y2H<-names(deg_Y2H)
+  node_deg_TAP<-names(deg_TAP)
+  node_deg_Y2H_data_frame<-as.data.frame(sapply(node_deg_Y2H, toupper))
+  node_deg_TAP_data_frame<-as.data.frame(sapply(node_deg_TAP, toupper))
+  
+  #start with transitivity
+  trans_Y2H<-transitivity(net_data_Y2H,type = "local")
+  trans_TAP<-transitivity(net_data_TAP,type = "local")
+  
+  
+  for (i in 1:length(trans_Y2H)) {
+    if(is.nan(trans_Y2H[i])) trans_Y2H[i]<-0
+  }
+  for (i in 1:length(trans_TAP)) {
+    if(is.nan(trans_TAP[i])) trans_TAP[i]<-0
+  }
+  trans_Y2H<-(trans_Y2H-mean(trans_Y2H))/sd(trans_Y2H)
+  trans_TAP<-(trans_TAP-mean(trans_TAP))/sd(trans_TAP)
+  
+  #for closeness
+  clo_Y2H<-closeness(net_data_Y2H)
+  clo_TAP<-closeness(net_data_TAP)
+  clo_Y2H<-(clo_Y2H-mean(clo_Y2H))/sd(clo_Y2H)
+  clo_TAP<-(clo_TAP-mean(clo_TAP))/sd(clo_TAP)
+  
+  #for independent variable
+  common_names_data_frame_Y2H<-as.data.frame(node_deg_Y2H_data_frame)  
+  common_names_vec_Y2H<-unlist(common_names_data_frame_Y2H)
+  names(common_names_vec_Y2H)<-common_names_vec_Y2H
+  is.vector(common_names_vec_Y2H)
+  essen_matched_data_frame_Y2H<-intersect(common_names_data_frame_Y2H$`sapply(node_deg_Y2H, toupper)`,essen_data$`#Gene_Ref`)
+  essen_matched_vec_Y2H<-as.vector(essen_matched_data_frame_Y2H)
+  common_names_vec_Y2H[essen_matched_vec_Y2H]<-1
+  size<-length(common_names_vec_Y2H)
+  for (i in 1:size) {
+    if(common_names_vec_Y2H[i]!=1) common_names_vec_Y2H[i]<-0
+  }
+  out_independent_Y2H<-as.numeric(common_names_vec_Y2H)
+  
+  
+  common_names_data_frame_TAP<-as.data.frame(node_deg_TAP_data_frame)  
+  common_names_vec_TAP<-unlist(common_names_data_frame_TAP)
+  names(common_names_vec_TAP)<-common_names_vec_TAP
+  is.vector(common_names_vec_TAP)
+  essen_matched_data_frame_TAP<-intersect(common_names_data_frame_TAP$`sapply(node_deg_TAP, toupper)`,essen_data$`#Gene_Ref`)
+  essen_matched_vec_TAP<-as.vector(essen_matched_data_frame_TAP)
+  common_names_vec_TAP[essen_matched_vec_TAP]<-1
+  size<-length(common_names_vec_TAP)
+  for (i in 1:size) {
+    if(common_names_vec_TAP[i]!=1) common_names_vec_TAP[i]<-0
+  }
+  out_independent_TAP<-as.numeric(common_names_vec_TAP)
+  
+  #output dataframe
+  return(list(TAP=data.frame(essential_TAP=out_independent_TAP,
+                             out_clo_vec_TAP=clo_TAP,
+                             out_trans_vec_TAP=trans_TAP,
+                             out_degree_vec_TAP=deg_TAP,
+                             protein=node_deg_TAP),
+              Y2H=data.frame(essential_Y2H=out_independent_Y2H,
+                             out_clo_vec_Y2H=clo_Y2H,
+                             out_trans_vec_Y2H=trans_Y2H,
+                             out_degree_vec_Y2H=deg_Y2H,
+                             protein=node_deg_Y2H)
+  ))
+}
+
+#apply to each species network, obtain data list for each species PPI networks
+fly_glm_data<-logistic_data(essen_data = Fly_essential,net_data_Y2H =fly_Y2H_igraph_actual ,net_data_TAP =fly_TAP_igraph_actual )
+yeast_glm_data<-logistic_data(essen_data = yeast_essential,net_data_Y2H =yeast_Y2H_igraph_actual ,net_data_TAP =yeast_TAP_igraph_actual )
+mouse_glm_data<-logistic_data(essen_data = Mus_musculus_essential,net_data_Y2H =mus_musculus_Y2H_igraph_actual ,net_data_TAP =mus_musculus_TAP_igraph_actual )
+human_glm_data<-logistic_data(essen_data = Homo_sapiens_essential,net_data_Y2H =homo_sapien_Y2H_igraph_actual ,net_data_TAP =homo_sapien_TAP_igraph_actual )
+fission_yeast_glm_data<-logistic_data(essen_data = Schizosaccharomyces_pombe_essential,net_data_Y2H =Schizosaccharomyces_pombe_Y2H_igraph_actual ,net_data_TAP =Schizosaccharomyces_pombe_TAP_igraph_actual )
+rockress_glm_data<-logistic_data(essen_data = Arabidopsis_thaliana_essential,net_data_Y2H =Arabidopsis_thaliana_Columbia_Y2H_igraph_actual ,net_data_TAP =Arabidopsis_thaliana_Columbia_Y2H_igraph_actual )
+
+#separate into corresponding types
+fly_glm_data_TAP<-fly_glm_data[[1]]
+yeast_glm_data_TAP<-yeast_glm_data[[1]]
+mouse_glm_data_TAP<-mouse_glm_data[[1]]
+human_glm_data_TAP<-human_glm_data[[1]]
+fission_yeast_glm_data_TAP<-fission_yeast_glm_data[[1]]
+rockress_glm_data_TAP<-rockress_glm_data[[1]]
+fly_glm_data_Y2H<-fly_glm_data[[2]]
+yeast_glm_data_Y2H<-yeast_glm_data[[2]]
+mouse_glm_data_Y2H<-mouse_glm_data[[2]]
+human_glm_data_Y2H<-human_glm_data[[2]]
+rockress_glm_data_Y2H<-rockress_glm_data[[2]]
+fission_yeast_glm_data_Y2H<-fission_yeast_glm_data[[2]]
+
+
+#Now initialise training set
+training_set_TAP<-rbind(fission_yeast_glm_data_TAP,mouse_glm_data_TAP,human_glm_data_TAP)
+training_set_Y2H<-rbind(fission_yeast_glm_data_Y2H,mouse_glm_data_Y2H,human_glm_data_Y2H)
+
+
+#Implement TAP model(Initial)
+TAP_glm<-glm(training_set_TAP$essential_TAP ~ training_set_TAP$out_clo_vec_TAP + training_set_TAP$out_trans_vec_TAP
+             + training_set_TAP$out_degree_vec_TAP, family = "binomial"(link="logit"))
+summary(TAP_glm)
+vif(TAP_glm)
+
+#Implement Y2H model(Initial)
+Y2H_glm<-glm(training_set_Y2H$essential_Y2H ~ training_set_Y2H$out_clo_vec_Y2H + training_set_Y2H$out_trans_vec_Y2H
+             + training_set_Y2H$out_degree_vec_Y2H, family = "binomial"(link="logit"))
+summary(Y2H_glm)
+vif(Y2H_glm)
+
+#Now, starting from validation
+#prepare validation set
+validation_set<-rbind(yeast_glm_data_validation,rockress_glm_data_validation,fly_glm_data_validation)
+
+#For Y2H
+#gain predictions,cutoff point 0.5
+predict_y2h<-Y2H_glm$coefficients[1]+Y2H_glm$coefficients[2]*validation_set$out_clo_vec+Y2H_glm$coefficients[3]*validation_set$out_trans_vec+Y2H_glm$coefficients[4]*validation_set$out_degree_vec
+sigmoid <- function(x) {
+  1 / (1 + exp(-x))
+}
+predict_y2h<-sapply(predict_y2h,function(x) sigmoid(x))
+predict_y2h[predict_y2h>=0.5]<-1
+predict_y2h[predict_y2h<0.5]<-0
+
+#initialise
+TP<-0
+TN<-0
+FP<-0
+FN<-0
+compare<-validation_set$essential_TAP
+for (i in 1:length(predict_y2h)) {
+  if(predict_y2h[i]==1&compare[i]==1) TP<-TP+1
+  if(predict_y2h[i]==0&compare[i]==0) TN<-TN+1
+  if(predict_y2h[i]==1&compare[i]==0) FP<-FP+1
+  if(predict_y2h[i]==0&compare[i]==1) FN<-FN+1
+}
+#output the rates and metrics
+TP
+TN
+FP
+FN
+#metrics
+SN<-TP/(TP+FN)
+SP<-TN/(TN+FP)
+PPV<-TP/(TP+FP)
+NPV<-TN/(TN+FN)
+F_measure<-(2*SN*PPV)/(SN+PPV)
+ACC<-(TP+TN)/(TP+TN+FP+FN)
+SN
+SP
+PPV
+NPV
+F_measure
+ACC
+
+#For TAP
+#gain predictions,cutoff point 0.5
+predict_tap<-TAP_glm$coefficients[1]+TAP_glm$coefficients[2]*validation_set$out_clo_vec
+predict_tap<-sapply(predict_tap,function(x) sigmoid(x))
+predict_tap[predict_tap>=0.5]<-1
+predict_tap[predict_tap<0.5]<-0
+
+#initialise
+TP2<-0
+TN2<-0
+FP2<-0
+FN2<-0
+compare<-validation_set$essential_TAP
+for (i in 1:length(predict_y2h)) {
+  if(predict_tap[i]==1&compare[i]==1) TP2<-TP2+1
+  if(predict_tap[i]==0&compare[i]==0) TN2<-TN2+1
+  if(predict_tap[i]==1&compare[i]==0) FP2<-FP2+1
+  if(predict_tap[i]==0&compare[i]==1) FN2<-FN2+1
+}
+#output confusion matrix
+TP2
+TN2
+FP2
+FN2
+#metrics
+SN2<-TP2/(TP2+FN2)
+SP2<-TN2/(TN2+FP2)
+PPV2<-TP2/(TP2+FP2)
+NPV2<-TN2/(TN2+FN2)
+F_measure2<-(2*SN2*PPV2)/(SN2+PPV2)
+ACC2<-(TP2+TN2)/(TP2+TN2+FP2+FN2)
+SN2
+SP2
+PPV2
+NPV2
+F_measure2
+ACC2
+
+
+
+
+
+
+
+#Logistic model 2####
+#In dissertation, there are two frameworks.
+#start with framework one, where is to weighing evidence
+#channels between experiments
+
+#first assign the independent variable, and get the dataframe
+#Note this function get variables normalised
+whether_essential<-function(essen_data,net_data_Y2H,net_data_TAP){
+  #essen_data should be dataframe
+  #the two network data should be igraph
+  #make sure inputs are igraph
+  net_data_Y2H<-getgcc(net_data_Y2H)
+  net_data_TAP<-getgcc(net_data_TAP)
+  essen_data<-as.data.frame(essen_data)
+  essen_data<-as.data.frame(sapply(essen_data, toupper))
+  #need to extract common nodes
+  deg_Y2H<-degree(net_data_Y2H)
+  deg_TAP<-degree(net_data_TAP)
+  node_deg_Y2H<-names(deg_Y2H)
+  node_deg_TAP<-names(deg_TAP)
+  node_deg_Y2H_df<-as.data.frame(node_deg_Y2H)
+  node_deg_TAP_df<-as.data.frame(node_deg_TAP)
+  common_node_actual<-intersect(node_deg_Y2H_df$node_deg_Y2H,node_deg_TAP_df$node_deg_TAP)
+  #and form new igraph subsets
+  net_data_TAP<-subgraph(net_data_TAP,common_node_actual)
+  net_data_Y2H<-subgraph(net_data_Y2H,common_node_actual)
+  #now extract out protein names and explanatory variables
+  #first using only the matching nodes
+  deg_Y2H<-degree(net_data_Y2H)
+  deg_TAP<-degree(net_data_TAP)
+  node_deg_Y2H<-names(deg_Y2H)
+  node_deg_TAP<-names(deg_TAP)
+  node_deg_Y2H_data_frame<-as.data.frame(sapply(node_deg_Y2H, toupper))
+  node_deg_TAP_data_frame<-as.data.frame(sapply(node_deg_TAP, toupper))
+  deg_commom_data_frame<-intersect(node_deg_Y2H_data_frame$`sapply(node_deg_Y2H, toupper)`, 
+                                   node_deg_TAP_data_frame$`sapply(node_deg_TAP, toupper)`) 
+  deg_commom_vec<-as.vector(deg_commom_data_frame)
+  #rename to capital
+  node_deg_Y2H_vec<-sapply(node_deg_Y2H, toupper)
+  node_deg_TAP_vec<-sapply(node_deg_TAP, toupper)
+  names(deg_Y2H)<-node_deg_Y2H_vec
+  names(deg_TAP)<-node_deg_TAP_vec
+  #degree vector
+  out_degree_vec_Y2H<-deg_Y2H[deg_commom_vec]
+  out_degree_vec_TAP<-deg_TAP[deg_commom_vec]
+  
+  #start with transitivity
+  trans_Y2H<-transitivity(net_data_Y2H,type = "local")
+  trans_TAP<-transitivity(net_data_TAP,type = "local")
+  names(trans_Y2H)<-node_deg_Y2H
+  names(trans_TAP)<-node_deg_TAP
+  node_trans_Y2H<-node_deg_Y2H
+  node_trans_TAP<-node_deg_TAP
+  node_trans_Y2H_data_frame<-as.data.frame(sapply(node_trans_Y2H, toupper))
+  node_trans_TAP_data_frame<-as.data.frame(sapply(node_trans_TAP, toupper))
+  trans_commom_data_frame<-intersect(node_trans_Y2H_data_frame$`sapply(node_trans_Y2H, toupper)`, 
+                                     node_trans_TAP_data_frame$`sapply(node_trans_TAP, toupper)`) 
+  trans_commom_vec<-as.vector(trans_commom_data_frame)
+  #rename to capital
+  node_trans_Y2H_vec<-sapply(node_trans_Y2H, toupper)
+  node_trans_TAP_vec<-sapply(node_trans_TAP, toupper)
+  names(trans_Y2H)<-node_trans_Y2H_vec
+  names(trans_TAP)<-node_trans_TAP_vec
+  #trans vector
+  out_trans_vec_Y2H<-trans_Y2H[trans_commom_vec]
+  out_trans_vec_TAP<-trans_TAP[trans_commom_vec]
+  
+  for (i in 1:length(out_trans_vec_Y2H)) {
+    if(is.nan(out_trans_vec_Y2H[i])) out_trans_vec_Y2H[i]<-0
+  }
+  for (i in 1:length(out_trans_vec_TAP)) {
+    if(is.nan(out_trans_vec_TAP[i])) out_trans_vec_TAP[i]<-0
+  }
+  
+  #for closeness
+  clo_Y2H<-closeness(net_data_Y2H)
+  clo_TAP<-closeness(net_data_TAP)
+  node_clo_Y2H<-names(clo_Y2H)
+  node_clo_TAP<-names(clo_TAP)
+  node_clo_Y2H_data_frame<-as.data.frame(sapply(node_clo_Y2H, toupper))
+  node_clo_TAP_data_frame<-as.data.frame(sapply(node_clo_TAP, toupper))
+  clo_commom_data_frame<-intersect(node_clo_Y2H_data_frame$`sapply(node_clo_Y2H, toupper)`, 
+                                   node_clo_TAP_data_frame$`sapply(node_clo_TAP, toupper)`) 
+  clo_commom_vec<-as.vector(clo_commom_data_frame)
+  #rename to capital
+  node_clo_Y2H_vec<-sapply(node_clo_Y2H, toupper)
+  node_clo_TAP_vec<-sapply(node_clo_TAP, toupper)
+  names(clo_Y2H)<-node_clo_Y2H_vec
+  names(clo_TAP)<-node_clo_TAP_vec
+  #degree vector
+  out_clo_vec_Y2H<-clo_Y2H[clo_commom_vec]
+  out_clo_vec_TAP<-clo_TAP[clo_commom_vec]
+  
+  
+  #for independent variable
+  common_names_data_frame<-as.data.frame(deg_commom_data_frame)  
+  common_names_vec<-unlist(common_names_data_frame)
+  names(common_names_vec)<-common_names_vec
+  is.vector(common_names_vec)
+  essen_matched_data_frame<-intersect(common_names_data_frame$deg_commom_data_frame,essen_data$`#Gene_Ref`)
+  essen_matched_vec<-as.vector(essen_matched_data_frame)
+  common_names_vec[essen_matched_vec]<-1
+  size<-length(common_names_vec)
+  for (i in 1:size) {
+    if(common_names_vec[i]!=1) common_names_vec[i]<-0
+  }
+  out_independent<-as.numeric(common_names_vec)
+  
+  #normalise
+  out_clo_vec_TAP<-(out_clo_vec_TAP-mean(out_clo_vec_TAP))/sd(out_clo_vec_TAP)
+  out_clo_vec_Y2H<-(out_clo_vec_Y2H-mean(out_clo_vec_Y2H))/sd(out_clo_vec_Y2H)
+  out_trans_vec_TAP<-(out_trans_vec_TAP-mean(out_trans_vec_TAP))/sd(out_trans_vec_TAP)
+  out_trans_vec_Y2H<-(out_trans_vec_Y2H-mean(out_trans_vec_Y2H))/sd(out_trans_vec_Y2H)
+  out_degree_vec_TAP<-(out_degree_vec_TAP-mean(out_degree_vec_TAP))/sd(out_degree_vec_TAP)
+  out_degree_vec_Y2H<-(out_degree_vec_Y2H-mean(out_degree_vec_Y2H))/sd(out_degree_vec_Y2H)
+  
+  #number of interactions
+  tap_int<-rep(ecount(net_data_TAP),size)
+  y2h_int<-rep(ecount(net_data_Y2H),size)
+  
+  
+  #output dataframe
+  return(data.frame(essential=out_independent,
+                    out_clo_vec_TAP=out_clo_vec_TAP,
+                    out_clo_vec_Y2H=out_clo_vec_Y2H,
+                    out_trans_vec_TAP=out_trans_vec_TAP,
+                    out_trans_vec_Y2H=out_trans_vec_Y2H,
+                    out_degree_vec_TAP=out_degree_vec_TAP,
+                    out_degree_vec_Y2H=out_degree_vec_Y2H,
+                    protein=trans_commom_vec,
+                    tap=tap_int,
+                    y2h=y2h_int))
+}
+
+
+#apply function and get datasets
+fly_glm_data<-whether_essential(essen_data = Fly_essential,net_data_Y2H =fly_Y2H_igraph_actual ,net_data_TAP =fly_TAP_igraph_actual )
+yeast_glm_data<-whether_essential(essen_data = yeast_essential,net_data_Y2H =yeast_Y2H_igraph_actual ,net_data_TAP =yeast_TAP_igraph_actual )
+mouse_glm_data<-whether_essential(essen_data = Mus_musculus_essential,net_data_Y2H =mus_musculus_Y2H_igraph_actual ,net_data_TAP =mus_musculus_TAP_igraph_actual )
+Schizosaccharomyces_pombe_glm_data<-whether_essential(essen_data = Schizosaccharomyces_pombe_essential,
+                                                      net_data_Y2H =Schizosaccharomyces_pombe_Y2H_igraph_actual ,
+                                                      net_data_TAP =Schizosaccharomyces_pombe_TAP_igraph_actual )
+huam_glm_data<-whether_essential(essen_data = Homo_sapiens_essential,net_data_Y2H =homo_sapien_Y2H_igraph_actual ,
+                                 net_data_TAP =homo_sapien_TAP_igraph_actual )
+Arabidopsis_thaliana_glm_data<-whether_essential(essen_data = Arabidopsis_thaliana_essential,
+                                                 net_data_Y2H =Arabidopsis_thaliana_Columbia_Y2H_igraph_actual ,
+                                                 net_data_TAP =Arabidopsis_thaliana_Columbia_TAP_igraph_actual )
+
+#implementing combined model on the training set
+#Intial Model
+training_set<-rbind(Schizosaccharomyces_pombe_glm_data,huam_glm_data,mouse_glm_data)
+training_logistic_model<-glm(training_set$essential ~ training_set$out_clo_vec_TAP + training_set$out_clo_vec_Y2H
+                             + training_set$out_trans_vec_TAP+training_set$out_trans_vec_Y2H
+                             +training_set$out_degree_vec_TAP+training_set$out_degree_vec_Y2H, family = "binomial"(link="logit"))
+summary(training_logistic_model)
+vif(training_logistic_model)
+anova(training_logistic_model,test = "Chisq")
+
+
+#start model selection, where each new model removes the least
+#statistically significant variable
+#model 2
+training_logistic_model2<-glm(training_set$essential ~ training_set$out_clo_vec_TAP + training_set$out_clo_vec_Y2H
+                              + training_set$out_trans_vec_TAP
+                              +training_set$out_degree_vec_TAP+training_set$out_degree_vec_Y2H, family = "binomial"(link="logit"))
+summary(training_logistic_model2)
+vif(training_logistic_model2)
+
+#final selected model
+training_logistic_model3<-glm(training_set$essential ~ training_set$out_clo_vec_Y2H
+                              + training_set$out_trans_vec_TAP
+                              +training_set$out_degree_vec_TAP+training_set$out_degree_vec_Y2H, family = "binomial"(link="logit"))
+summary(training_logistic_model3)
+vif(training_logistic_model3)
+
+#Start to perform prediction on the validation set and output AUC
+#Firstly, design a function for evaluation, which outputs evaluation
+#metrics and AUC. AUC used in dissertation
+
+#This evaluation is for intial model
+model2_validation<-function(data){
+  #assess whether it is affected by data imbalance issue
+  predict<-training_logistic_model$coefficients[1]+training_logistic_model$coefficients[2]*data$out_clo_vec_TAP+training_logistic_model$coefficients[3]*data$out_clo_vec_Y2H+training_logistic_model$coefficients[4]*data$out_trans_vec_TAP+
+    training_logistic_model$coefficients[5]*data$out_trans_vec_Y2H+training_logistic_model$coefficients[6]*data$out_degree_vec_TAP+training_logistic_model$coefficients[7]*data$out_degree_vec_Y2H
+  
+  
+  compare<-data$essential
+  au<-auc(compare,predict)
+  predict<-sapply(predict,function(x) sigmoid(x))
+  predict[predict>=0.5]<-1
+  predict[predict<0.5]<-0
+  
+  #initialise
+  TP<-0
+  TN<-0
+  FP<-0
+  FN<-0
+  
+  for (i in 1:length(predict)) {
+    if(predict[i]==1&compare[i]==1) TP<-TP+1
+    if(predict[i]==0&compare[i]==0) TN<-TN+1
+    if(predict[i]==1&compare[i]==0) FP<-FP+1
+    if(predict[i]==0&compare[i]==1) FN<-FN+1
+  }
+  TP
+  TN
+  FP
+  FN
+  predict_y2h
+  
+  SN<-TP/(TP+FN)
+  SP<-TN/(TN+FP)
+  PPV<-TP/(TP+FP)
+  NPV<-TN/(TN+FN)
+  F_measure<-(2*SN*PPV)/(SN+PPV)
+  ACC<-(TP+TN)/(TP+TN+FP+FN)
+  data$tap[1]/data$y2h[1]
+  print(c(data$tap[1]/data$y2h[1],SN,
+          SP,
+          PPV,
+          NPV,
+          F_measure,
+          ACC,au))
+}
+
+#This function is for selected model
+model2_validation_selected<-function(data){
+  #assess whether it is affected by data imbalance issue
+  predict<-training_logistic_model3$coefficients[1]+training_logistic_model3$coefficients[2]*data$out_clo_vec_Y2H+training_logistic_model3$coefficients[3]*data$out_trans_vec_TAP+
+    training_logistic_model3$coefficients[4]*data$out_degree_vec_TAP+training_logistic_model3$coefficients[5]*data$out_degree_vec_Y2H
+  
+  
+  compare<-data$essential
+  au<-auc(compare,predict)
+  predict<-sapply(predict,function(x) sigmoid(x))
+  predict[predict>=0.5]<-1
+  predict[predict<0.5]<-0
+  
+  #initialise
+  TP<-0
+  TN<-0
+  FP<-0
+  FN<-0
+  
+  for (i in 1:length(predict)) {
+    if(predict[i]==1&compare[i]==1) TP<-TP+1
+    if(predict[i]==0&compare[i]==0) TN<-TN+1
+    if(predict[i]==1&compare[i]==0) FP<-FP+1
+    if(predict[i]==0&compare[i]==1) FN<-FN+1
+  }
+  TP
+  TN
+  FP
+  FN
+  predict_y2h
+  
+  SN<-TP/(TP+FN)
+  SP<-TN/(TN+FP)
+  PPV<-TP/(TP+FP)
+  NPV<-TN/(TN+FN)
+  F_measure<-(2*SN*PPV)/(SN+PPV)
+  ACC<-(TP+TN)/(TP+TN+FP+FN)
+  data$tap[1]/data$y2h[1]
+  print(c(data$tap[1]/data$y2h[1],SN,
+          SP,
+          PPV,
+          NPV,
+          F_measure,
+          ACC,au))
+}
+
+#form validation set and obtain the AUC
+validation_set<-rbind(fly_glm_data,yeast_glm_data,Arabidopsis_thaliana_glm_data)
+#for inital model
+model2_validation(validation_set)
+#for selected model
+model2_validation_selected(validation_set)
+
+#Perform on inidividual networks, to investigate data imbalance issue
+model2_validation(Arabidopsis_thaliana_glm_data)
+model2_validation(fly_glm_data)
+model2_validation(yeast_glm_data)
+model2_validation(mouse_glm_data)
+model2_validation(Schizosaccharomyces_pombe_glm_data)
+model2_validation(huam_glm_data)
+model2_validation(Arabidopsis_thaliana_glm_data)
+
+#better performance in dataset with more tap data
+#and imbalance issue exist.
+
+
+#end of framework one
+
+
+
+#starting framework two, where interactions with equal weights
+#function to gain model data
+common_model<-function(essen_data,net_data_Y2H,net_data_TAP,Y2H_data,TAP_data){
+  #essen_data should be dataframe
+  #the two network data should be igraph
+  essen_data<-as.data.frame(essen_data)
+  essen_data<-as.data.frame(sapply(essen_data, toupper))
+  
+  #combine to generate new dataframe
+  new_data<-rbind(Y2H_data,TAP_data)
+  new_data_igraph<-graph_from_data_frame(new_data)
+  new_data_igraph<-simplify_graph(new_data_igraph)
+  
+  #need to extract common nodes
+  deg_Y2H<-degree(net_data_Y2H)
+  deg_TAP<-degree(net_data_TAP)
+  node_deg_Y2H<-names(deg_Y2H)
+  node_deg_TAP<-names(deg_TAP)
+  node_deg_Y2H_df<-as.data.frame(node_deg_Y2H)
+  node_deg_TAP_df<-as.data.frame(node_deg_TAP)
+  common_node_actual<-intersect(node_deg_Y2H_df$node_deg_Y2H,node_deg_TAP_df$node_deg_TAP)
+  #and form new igraph subsets
+  new_data_igraph<-subgraph(new_data_igraph,common_node_actual)
+  new_data_igraph<-getgcc(new_data_igraph)
+  
+  #now extract out protein names and explanatory variables
+  #degree
+  deg<-degree(new_data_igraph)
+  node<-names(deg)
+  node_upper<-as.data.frame(sapply(node,toupper))
+  node_upper_vec<-unlist(node_upper)
+  
+  #transitivity
+  trans<-transitivity(new_data_igraph,type = "local")
+  for (i in 1:length(trans)) {
+    if(is.nan(trans[i])) trans[i]<-0
+  }
+  
+  #for closeness
+  clo<-closeness(new_data_igraph)
+  
+  
+  #for independent variable
+  essen_matched_data_frame<-intersect(node_upper$`sapply(node, toupper)`,essen_data$`#Gene_Ref`)
+  essen_matched_vec<-unlist(essen_matched_data_frame)
+  is.vector(essen_matched_vec)
+  names(node_upper_vec)<-node_upper_vec
+  node_upper_vec[essen_matched_vec]<-1
+  size<-length(node_upper_vec)
+  for (i in 1:size) {
+    if(node_upper_vec[i]!=1) node_upper_vec[i]<-0
+  }
+  out_independent<-as.numeric(node_upper_vec)
+  
+  #normalise
+  clo<-(clo-mean(clo))/sd(clo)
+  deg<-(deg-mean(deg))/sd(deg)
+  trans<-(trans-mean(trans))/sd(trans)
+  
+  
+  #output dataframe
+  return(data.frame(essential=out_independent,
+                    clo=clo,
+                    deg=deg,
+                    trans=trans))
+}
+
+#form the data for common dataframe
+fly_common_data<-common_model(essen_data = Fly_essential,net_data_Y2H =fly_Y2H_igraph_actual ,net_data_TAP =fly_TAP_igraph_actual,Y2H_data = fly_Y2H_actual,TAP_data = fly_TAP_actual )
+yeast_common_data<-common_model(essen_data = yeast_essential,net_data_Y2H =yeast_Y2H_igraph_actual ,net_data_TAP =yeast_TAP_igraph_actual,Y2H_data = yeast_Y2H_actual,TAP_data = yeast_TAP_actual )
+mouse_common_data<-common_model(essen_data = Mus_musculus_essential,net_data_Y2H =mus_musculus_Y2H_igraph_actual ,net_data_TAP =mus_musculus_TAP_igraph_actual,Y2H_data = mus_musculus_Y2H_actual,TAP_data = mus_musculus_TAP_actual )
+Schizosaccharomyces_pombe_common_data<-common_model(essen_data = Schizosaccharomyces_pombe_essential,
+                                                    net_data_Y2H =Schizosaccharomyces_pombe_Y2H_igraph_actual ,
+                                                    net_data_TAP =Schizosaccharomyces_pombe_TAP_igraph_actual,Y2H_data = Schizosaccharomyces_pombe_Y2H_actual,TAP_data = Schizosaccharomyces_pombe_TAP_actual  )
+huam_common_data<-common_model(essen_data = Homo_sapiens_essential,net_data_Y2H =homo_sapien_Y2H_igraph_actual ,
+                               net_data_TAP =homo_sapien_TAP_igraph_actual,Y2H_data = homo_sapien_Y2H_actual,TAP_data = homo_sapien_TAP_actual  )
+Arabidopsis_thaliana_common_data<-common_model(essen_data = Arabidopsis_thaliana_essential,
+                                               net_data_Y2H =Arabidopsis_thaliana_Columbia_Y2H_igraph_actual ,
+                                               net_data_TAP =Arabidopsis_thaliana_Columbia_TAP_igraph_actual ,Y2H_data = Arabidopsis_thaliana_Columbia_Y2H_actual,TAP_data = Arabidopsis_thaliana_Columbia_TAP_actual )
+
+#construct training set
+common_training_set<-rbind(Schizosaccharomyces_pombe_common_data,huam_common_data,mouse_common_data)
+#implement the common model, initial model
+common_glm<-glm(common_training_set$essential ~ common_training_set$clo + common_training_set$deg
+                + common_training_set$trans, family = "binomial"(link="logit"))
+summary(common_glm)
+vif(common_glm)
+
+#perform model selection
+#selected model
+common_glm2<-glm(common_training_set$essential ~ common_training_set$clo 
+                 + common_training_set$trans, family = "binomial"(link="logit"))
+summary(common_glm2)
+vif(common_glm2)
+
+
+#validation function, output evaluation metrics and AUC
+#for inital model
+common_model_validation<-function(data){
+  #assess whether it is affected by data imbalance issue
+  predict<-common_glm$coefficients[1]+common_glm$coefficients[2]*data$clo+common_glm$coefficients[3]*data$deg+common_glm$coefficients[4]*data$trans
+  
+  
+  compare<-data$essential
+  au<-auc(compare,predict)
+  predict<-sapply(predict,function(x) sigmoid(x))
+  predict[predict>=0.5]<-1
+  predict[predict<0.5]<-0
+  
+  #initialise
+  TP<-0
+  TN<-0
+  FP<-0
+  FN<-0
+  
+  for (i in 1:length(predict)) {
+    if(predict[i]==1&compare[i]==1) TP<-TP+1
+    if(predict[i]==0&compare[i]==0) TN<-TN+1
+    if(predict[i]==1&compare[i]==0) FP<-FP+1
+    if(predict[i]==0&compare[i]==1) FN<-FN+1
+  }
+  TP
+  TN
+  FP
+  FN
+  predict_y2h
+  
+  SN<-TP/(TP+FN)
+  SP<-TN/(TN+FP)
+  PPV<-TP/(TP+FP)
+  NPV<-TN/(TN+FN)
+  F_measure<-(2*SN*PPV)/(SN+PPV)
+  ACC<-(TP+TN)/(TP+TN+FP+FN)
+  data$tap[1]/data$y2h[1]
+  print(c(SN,
+          SP,
+          PPV,
+          NPV,
+          F_measure,
+          ACC,au))
+}
+#for selected model
+common_model_validation_selected<-function(data){
+  #assess whether it is affected by data imbalance issue
+  predict<-common_glm2$coefficients[1]+common_glm2$coefficients[2]*data$clo+common_glm2$coefficients[3]*data$trans
+  
+  
+  compare<-data$essential
+  au<-auc(compare,predict)
+  predict<-sapply(predict,function(x) sigmoid(x))
+  predict[predict>=0.5]<-1
+  predict[predict<0.5]<-0
+  
+  #initialise
+  TP<-0
+  TN<-0
+  FP<-0
+  FN<-0
+  
+  for (i in 1:length(predict)) {
+    if(predict[i]==1&compare[i]==1) TP<-TP+1
+    if(predict[i]==0&compare[i]==0) TN<-TN+1
+    if(predict[i]==1&compare[i]==0) FP<-FP+1
+    if(predict[i]==0&compare[i]==1) FN<-FN+1
+  }
+  TP
+  TN
+  FP
+  FN
+  predict_y2h
+  
+  SN<-TP/(TP+FN)
+  SP<-TN/(TN+FP)
+  PPV<-TP/(TP+FP)
+  NPV<-TN/(TN+FN)
+  F_measure<-(2*SN*PPV)/(SN+PPV)
+  ACC<-(TP+TN)/(TP+TN+FP+FN)
+  data$tap[1]/data$y2h[1]
+  print(c(SN,
+          SP,
+          PPV,
+          NPV,
+          F_measure,
+          ACC,au))
+}
+
+#construct the validation set
+common_validation_set<-rbind(fly_common_data,yeast_common_data,Arabidopsis_thaliana_common_data)
+
+#find prediction performance, which contains the AUC
+common_model_validation(common_validation_set)
+common_model_validation_selected(common_validation_set)
+
+#Results support weighing evidence channels
+#end of framework two.
+
+
+
+
+
+
+
+#######################
+#Material for appendix#
+#######################
+#NetEMD#######
+#NetEMD for full network
+fly_TAP_gdd2<-gdd(fly_TAP_igraph,max_graphlet_size = 5)
+fly_Y2H_gdd2<-gdd(fly_Y2H_igraph,max_graphlet_size = 5)
+homo_sapien_Y2H_gdd2<-gdd(homo_sapien_Y2H_igraph,max_graphlet_size = 5)
+Arabidopsis_thaliana_Columbia_Y2H_gdd2<-gdd(Arabidopsis_thaliana_Columbia_Y2H_igraph,max_graphlet_size = 5)
+yeast_Y2H_gdd2<-gdd(yeast_Y2H_igraph,max_graphlet_size = 5)
+mus_musculus_Y2H_gdd2<-gdd(mus_musculus_Y2H_igraph,max_graphlet_size = 5)
+homo_sapien_TAP_gdd2<-gdd(homo_sapien_TAP_igraph,max_graphlet_size = 5)
+Arabidopsis_thaliana_Columbia_TAP_gdd2<-gdd(Arabidopsis_thaliana_Columbia_TAP_igraph,max_graphlet_size = 5)
+yeast_TAP_gdd2<-gdd(yeast_TAP_igraph,max_graphlet_size = 5)
+mus_musculus_TAP_gdd2<-gdd(mus_musculus_TAP_igraph,max_graphlet_size = 5)
+Schizosaccharomyces_pombe_Y2H_gdd2<- gdd(Schizosaccharomyces_pombe_Y2H_igraph,max_graphlet_size = 5)
+Schizosaccharomyces_pombe_TAP_gdd2<- gdd(Schizosaccharomyces_pombe_TAP_igraph,max_graphlet_size = 5)
+Caenorhabditis_elegans_Y2H_gdd2<- gdd(Caenorhabditis_elegans_Y2H_igraph,max_graphlet_size = 5)
+Caenorhabditis_elegans_TAP_gdd2<- gdd(Caenorhabditis_elegans_TAP_igraph,max_graphlet_size = 5) 
+
+
+gdd_list2<-list(homo_sapien_Y2H_gdd2,
+                homo_sapien_TAP_gdd2,
+                fly_Y2H_gdd2,
+                fly_TAP_gdd2,
+                Arabidopsis_thaliana_Columbia_Y2H_gdd2,
+                Arabidopsis_thaliana_Columbia_TAP_gdd2,
+                yeast_Y2H_gdd2,
+                yeast_TAP_gdd2,
+                mus_musculus_Y2H_gdd2,
+                mus_musculus_TAP_gdd2,
+                Schizosaccharomyces_pombe_Y2H_gdd2,
+                Schizosaccharomyces_pombe_TAP_gdd2,
+                Caenorhabditis_elegans_Y2H_gdd2,
+                Caenorhabditis_elegans_TAP_gdd2)
+
+emd_five_matrix2<-matrix(0,14,14)
+for (i in 1:14){
+  for (j in i:14) {
+    inpu_emd<-net_emd(gdd_list2[[i]],gdd_list2[[j]])
+    emd_five_matrix2[i,j]<-inpu_emd
+  }
+} 
+saveemd_five_matrix2<-emd_five_matrix2
+colnames(saveemd_five_matrix2)<-c("Human Y2H","Human TAP","Fly Y2H","Fly TAP","Rockress Y2H","Rockress TAP",
+                                  "Yeast Y2H","Yeast TAP","Mouse Y2H","Mouse TAP","Fission Yeast Y2H","Fisson Yeast TAP",
+                                  "Round Worm Y2H","Round Worm TAP")
+
+saveemd_five_matrix2<-t(saveemd_five_matrix2)+saveemd_five_matrix2
+diag(saveemd_five_matrix2)<-rep(0,14)
+rownames(saveemd_five_matrix2)<-c("human")
+test_cluster_emd2_five<-as.dist(saveemd_five_matrix2, diag = T)
+pdf("EMD.pdf")
+plot(hclust(test_cluster_emd2_five, method = "average"), main="NetEMD Dendrogram Clustering for Full Networks",xlab ="")
+dev.off()
+
+#for other clustering approaches
+pdf("suppl_emd_large_complete.pdf")
+plot(hclust(test_cluster_emd2_five_large, method = "complete"),main = "NetEMD Dendrogram for The Largest Connected Components",xlab="")
+dev.off()
+
+pdf("suppl_emd_large_centroid.pdf")
+plot(hclust(test_cluster_emd2_five_large, method = "centroid"),main = "NetEMD Dendrogram for The Largest Connected Components",xlab="")
+dev.off()
+
+
+#NetEMD on graphlt up to size 4
+#implement NetEMD on the largest connected component
+fly_TAP_gdd2_large4<-gdd(fly_TAP_igraph_large,max_graphlet_size = 4)
+fly_Y2H_gdd2_large4<-gdd(fly_Y2H_igraph_large,max_graphlet_size = 4)
+homo_sapien_Y2H_gdd2_large4<-gdd(homo_sapien_Y2H_igraph_large,max_graphlet_size = 4)
+Arabidopsis_thaliana_Columbia_Y2H_gdd2_large4<-gdd(Arabidopsis_thaliana_Columbia_Y2H_igraph_large,max_graphlet_size = 4)
+yeast_Y2H_gdd2_large4<-gdd(yeast_Y2H_igraph_large,max_graphlet_size = 4)
+mus_musculus_Y2H_gdd2_large4<-gdd(mus_musculus_Y2H_igraph_large,max_graphlet_size = 4)
+homo_sapien_TAP_gdd2_large4<-gdd(homo_sapien_TAP_igraph_large,max_graphlet_size = 4)
+Arabidopsis_thaliana_Columbia_TAP_gdd2_large4<-gdd(Arabidopsis_thaliana_Columbia_TAP_igraph_large,max_graphlet_size = 4)
+yeast_TAP_gdd2_large4<-gdd(yeast_TAP_igraph_large,max_graphlet_size = 4)
+mus_musculus_TAP_gdd2_large4<-gdd(mus_musculus_TAP_igraph_large,max_graphlet_size = 4)
+Schizosaccharomyces_pombe_Y2H_gdd2_large4<- gdd(Schizosaccharomyces_pombe_Y2H_igraph_large,max_graphlet_size = 4)
+Schizosaccharomyces_pombe_TAP_gdd2_large4<- gdd(Schizosaccharomyces_pombe_TAP_igraph_large,max_graphlet_size = 4)
+Caenorhabditis_elegans_Y2H_gdd2_large4<- gdd(Caenorhabditis_elegans_Y2H_igraph_large,max_graphlet_size = 4)
+Caenorhabditis_elegans_TAP_gdd2_large4<- gdd(Caenorhabditis_elegans_TAP_igraph_large,max_graphlet_size = 4) 
+
+
+gdd_list2_large4<-list(homo_sapien_Y2H_gdd2_large4,
+                       homo_sapien_TAP_gdd2_large4,
+                       fly_Y2H_gdd2_large4,
+                       fly_TAP_gdd2_large4,
+                       Arabidopsis_thaliana_Columbia_Y2H_gdd2_large4,
+                       Arabidopsis_thaliana_Columbia_TAP_gdd2_large4,
+                       yeast_Y2H_gdd2_large4,
+                       yeast_TAP_gdd2_large4,
+                       mus_musculus_Y2H_gdd2_large4,
+                       mus_musculus_TAP_gdd2_large4,
+                       Schizosaccharomyces_pombe_Y2H_gdd2_large4,
+                       Schizosaccharomyces_pombe_TAP_gdd2_large4,
+                       Caenorhabditis_elegans_Y2H_gdd2_large4,
+                       Caenorhabditis_elegans_TAP_gdd2_large4)
+
+emd_five_matrix2_large4<-matrix(0,14,14)
+for (i in 1:14){
+  for (j in i:14) {
+    inpu_emd<-net_emd(gdd_list2_large4[[i]],gdd_list2_large4[[j]])
+    emd_five_matrix2_large4[i,j]<-inpu_emd
+  }
+} 
+saveemd_five_matrix2_large4<-emd_five_matrix2_large4
+colnames(saveemd_five_matrix2_large4)<-c("Human Y2H","Human TAP","Fly Y2H","Fly TAP","Rockress Y2H","Rockress TAP",
+                                         "Yeast Y2H","Yeast TAP","Mouse Y2H","Mouse TAP","Fission Yeast Y2H","Fisson Yeast TAP",
+                                         "Round Worm Y2H","Round Worm TAP")
+
+saveemd_five_matrix2_large4<-t(saveemd_five_matrix2_large4)+saveemd_five_matrix2_large4
+diag(saveemd_five_matrix2_large4)<-rep(0,14)
+test_cluster_emd2_five_large4<-as.dist(saveemd_five_matrix2_large4, diag = T)
+pdf("emd_large4.pdf")
+plot(hclust(test_cluster_emd2_five_large4, method = "average"),main = "NetEMD(Size 4) Dendrogram for The Largest Connected Components",xlab="")
+dev.off()
+
+
+#Netdis###########
+netdis2_optimised<-function(){
+  more_net_matrix1<-matrix(0,ncol = 14,nrow = 14)
+  more_net_matrix2<-matrix(0,ncol = 14,nrow = 14)
+  
+  max_graphlet_size = 4
+  neighbourhood_size = 2
+  min_ego_nodes = 3
+  min_ego_edges=1
+  min_bin_count=5
+  num_bins=100
+  
+  ego_counts<-list()
+  ego_graphs<-list()
+  networklist<-list(homo_sapien_Y2H_igraph,
+                    homo_sapien_TAP_igraph,
+                    fly_Y2H_igraph,
+                    fly_TAP_igraph,
+                    Arabidopsis_thaliana_Columbia_Y2H_igraph,
+                    Arabidopsis_thaliana_Columbia_TAP_igraph,
+                    yeast_Y2H_igraph,
+                    yeast_TAP_igraph,
+                    mus_musculus_Y2H_igraph,
+                    mus_musculus_TAP_igraph,
+                    Schizosaccharomyces_pombe_Y2H_igraph,
+                    Schizosaccharomyces_pombe_TAP_igraph,
+                    Caenorhabditis_elegans_Y2H_igraph,
+                    Caenorhabditis_elegans_TAP_igraph)
+  for(i in 1:14){
+    ego_graphs[[i]]<-make_named_ego_graph(networklist[[i]], 
+                                          order = neighbourhood_size, 
+                                          min_ego_nodes = min_ego_nodes, 
+                                          min_ego_edges = min_ego_edges)
+    ego_counts[[i]]<-ego_to_graphlet_counts(ego_graphs[[i]], max_graphlet_size = max_graphlet_size)
+  }
+  
+  for (i in 1:14){
+    for (j in i:14) {
+      graph_1<-networklist[[i]]
+      graph_2<-networklist[[j]]
+      ego_1<-ego_graphs[[i]]
+      ego_2<-ego_graphs[[j]]
+      graphlet_counts_1<-ego_counts[[i]]
+      graphlet_counts_2<-ego_counts[[j]]
+      # Get ego-network densities
+      densities_1 <- ego_network_density(graphlet_counts_1)
+      densities_2 <- ego_network_density(graphlet_counts_2)
+      
+      # Adaptively bin ego-network densities
+      binned_densities_1 <- binned_densities_adaptive(densities_1, 
+                                                      min_counts_per_interval = min_bin_count, 
+                                                      num_intervals = num_bins)
+      
+      ego_density_bins_1 <- binned_densities_1$breaks
+      
+      binned_densities_2 <- binned_densities_adaptive(densities_2, 
+                                                      min_counts_per_interval = min_bin_count, 
+                                                      num_intervals = num_bins)
+      
+      ego_density_bins_2 <- binned_densities_2$breaks
+      #' INTERNAL FUNCTION - DO NOT CALL DIRECTLY
+      #' Calculate expected counts with geometric poisson (Polya-Aeppli)
+      #' approximation for a single density bin.
+      #' @param bin_idx Density bin index to calculate expected counts for.
+      #' @param graphlet_counts Graphlet counts for a number of ego_networks.
+      #' @param density_interval_indexes Density bin index for
+      #' each ego network.
+      exp_counts_bin_gp <- function(bin_idx, graphlet_counts,
+                                    density_interval_indexes,
+                                    mean_binned_graphlet_counts,
+                                    max_graphlet_size) {
+        counts <- graphlet_counts[density_interval_indexes == bin_idx, ]
+        means <- mean_binned_graphlet_counts[bin_idx, ]
+        
+        mean_sub_counts <- sweep(counts, 2, means)
+        
+        Vd_sq <- colSums(mean_sub_counts^2) / (nrow(mean_sub_counts) - 1)
+        theta_d <- 2 * means / (Vd_sq + means)
+        
+        exp_counts_dk <- vector()
+        for (k in 2:max_graphlet_size) {
+          graphlet_idx <- graphlet_ids_for_size(k)
+          
+          lambda_dk <- mean(2 * means[graphlet_idx]^2 /
+                              (Vd_sq[graphlet_idx] + means[graphlet_idx]),
+                            na.rm = TRUE)
+          
+          exp_counts_dk <- append(exp_counts_dk,
+                                  lambda_dk / theta_d[graphlet_idx])
+        }
+        
+        exp_counts_dk
+      }
+      
+      #' Calculate expected counts in density bins using the
+      #' geometric poisson (Polya-Aeppli) approximation.
+      #' @param graphlet_counts Graphlet counts for a number of ego_networks.
+      #' @param density_interval_indexes Density bin index for
+      #' each ego network.
+      #' @param max_graphlet_size Determines the maximum size of graphlets
+      #' included in graphlet_counts.
+      #' @export
+      density_binned_counts_gp <- function(graphlet_counts,
+                                           density_interval_indexes,
+                                           max_graphlet_size) {
+        
+        mean_binned_graphlet_counts <- mean_density_binned_graphlet_counts(
+          graphlet_counts,
+          density_interval_indexes)
+        
+        nbins <- length(unique(density_interval_indexes))
+        expected_counts_bin <- t(sapply(1:nbins,
+                                        exp_counts_bin_gp,
+                                        graphlet_counts = graphlet_counts,
+                                        density_interval_indexes = density_interval_indexes,
+                                        mean_binned_graphlet_counts = mean_binned_graphlet_counts,
+                                        max_graphlet_size = max_graphlet_size))
+        
+        # deal with NAs caused by bins with zero counts for a graphlet
+        expected_counts_bin[is.nan(expected_counts_bin)] <- 0
+        
+        expected_counts_bin
+      }
+      
+      binned_graphlet_counts_1 <- density_binned_counts_gp(graphlet_counts_1,
+                                                           binned_densities_1$interval_indexes,
+                                                           max_graphlet_size)
+      
+      binned_graphlet_counts_2 <- density_binned_counts_gp(graphlet_counts_2,
+                                                           binned_densities_2$interval_indexes,
+                                                           max_graphlet_size)
+      # Calculate expected graphlet counts for each ego network
+      exp_graphlet_counts_1 <- netdis_expected_counts(graphlet_counts_1, 
+                                                      ego_density_bins_1, 
+                                                      binned_graphlet_counts_1,
+                                                      max_graphlet_size,
+                                                      scale_fn = NULL)
+      
+      
+      exp_graphlet_counts_2 <- netdis_expected_counts(graphlet_counts_2, 
+                                                      ego_density_bins_2, 
+                                                      binned_graphlet_counts_2,
+                                                      max_graphlet_size,
+                                                      scale_fn = NULL)
+      # Centre graphlet counts by subtracting expected counts
+      centred_graphlet_counts_1 <- netdis_subtract_exp_counts(graphlet_counts_1,
+                                                              exp_graphlet_counts_1,
+                                                              max_graphlet_size)
+      
+      centred_graphlet_counts_2 <- netdis_subtract_exp_counts(graphlet_counts_2,
+                                                              exp_graphlet_counts_2,
+                                                              max_graphlet_size)
+      sum_graphlet_counts_1 <- colSums(centred_graphlet_counts_1)
+      
+      sum_graphlet_counts_2 <- colSums(centred_graphlet_counts_2)
+      netdis_result <- netdis_uptok(sum_graphlet_counts_1, 
+                                    sum_graphlet_counts_2, 
+                                    max_graphlet_size)
+      more_net_matrix1[i,j]<-netdis_result[1]
+      more_net_matrix2[i,j]<-netdis_result[2]
+    }
+  } 
+  return(list(more_net_matrix1,more_net_matrix2))
+}
+
+net2_matrix<-netdis2_optimised()
+
+savenet2_matrix1<-net2_matrix[[1]]
+savenet2_matrix2<-net2_matrix[[2]]
+savenet2_matrix1<-t(savenet2_matrix1)+savenet2_matrix1
+diag(savenet2_matrix1)<-rep(0,14)
+savenet2_matrix1<-savenet2_matrix1
+
+savenet2_matrix2<-t(savenet2_matrix2)+savenet2_matrix2
+diag(savenet2_matrix2)<-rep(0,14)
+savenet2_matrix2<-savenet2_matrix2
+
+colnames(savenet2_matrix1)<-c("Human Y2H","Human TAP","Fly Y2H","Fly TAP","Rockress Y2H","Rockress TAP",
+                              "Yeast Y2H","Yeast TAP","Mouse Y2H","Mouse TAP","Fission Yeast Y2H","Fisson Yeast TAP",
+                              "Round Worm Y2H","Round Worm TAP")
+
+net_more_matrix1_dist<-as.dist(savenet2_matrix1, diag = T)
+pdf("netdis_full_3.pdf")
+plot(hclust(net_more_matrix1_dist, method = "average"), main = "NetDis (Size 3) Dendrogram for Full Networks",xlab = "")
+dev.off()
+
+colnames(savenet2_matrix2)<-c("Human Y2H","Human TAP","Fly Y2H","Fly TAP","Rockress Y2H","Rockress TAP",
+                              "Yeast Y2H","Yeast TAP","Mouse Y2H","Mouse TAP","Fission Yeast Y2H","Fisson Yeast TAP",
+                              "Round Worm Y2H","Round Worm TAP")
+
+net_more_matrix2_dist<-as.dist(savenet2_matrix2, diag = T)
+pdf("netdis_full_4.pdf")
+plot(hclust(net_more_matrix2_dist, method = "average"), main = "NetDis (Size 4) Dendrogram for Full Networks",xlab = "")
+dev.off()
+
+
+#other clustring approach
+pdf("net4_large_complete.pdf")
+plot(hclust(cluster_large_netdis_matrix4, method = "complete"), main="NetDis (Size 4) Dendrogram for The Largest Connected Components",
+     xlab="")
+dev.off()
+
+pdf("net4_large_centroid.pdf")
+plot(hclust(cluster_large_netdis_matrix4, method = "centroid"), main="NetDis (Size 4) Dendrogram for The Largest Connected Components",
+     xlab="")
+dev.off()
+
+pdf("net3_large_complete.pdf")
+plot(hclust(cluster_large_netdis_matrix3, method = "complete"), main="NetDis (Size 3) Dendrogram for The Largest Connected Components",
+     xlab="")
+dev.off()
+
+pdf("net3_large_centroid.pdf")
+plot(hclust(cluster_large_netdis_matrix3, method = "centroid"), main="NetDis (Size 3) Dendrogram for The Largest Connected Components",
+     xlab="")
+dev.off()
+
+
+#gdda#########
+#for GDDA on full networks
+newgcdlist<-list(homo_sapien_Y2H_igraph,
+                 homo_sapien_TAP_igraph,
+                 fly_Y2H_igraph,
+                 fly_TAP_igraph,
+                 Arabidopsis_thaliana_Columbia_Y2H_igraph,
+                 Arabidopsis_thaliana_Columbia_TAP_igraph,
+                 yeast_Y2H_igraph,
+                 yeast_TAP_igraph,
+                 mus_musculus_Y2H_igraph,
+                 mus_musculus_TAP_igraph,
+                 Schizosaccharomyces_pombe_Y2H_igraph,
+                 Schizosaccharomyces_pombe_TAP_igraph,
+                 Caenorhabditis_elegans_Y2H_igraph,
+                 Caenorhabditis_elegans_TAP_igraph,
+                 Rattus_norvegicus_Y2H_igraph,
+                 Rattus_norvegicus_TAP_igraph,
+                 Candida_albicans_Y2H_igraph,
+                 Candida_albicans_TAP_igraph)
+
+gdda_matrix<-matrix(0,ncol = 14,nrow = 14)
+for (i in 1:14){
+  for (j in i:14) {
+    inpu_gdd<-netGDD(newgcdlist[[i]],newgcdlist[[j]])
+    gdda_matrix[i,j]<-inpu_gdd
+  }
+} 
+savegdda<-gdda_matrix
+colnames(savegdda)<-c("Human Y2H","Human TAP","Fly Y2H","Fly TAP","Rockress Y2H","Rockress TAP",
+                      "Yeast Y2H","Yeast TAP","Mouse Y2H","Mouse TAP","Fission Yeast Y2H","Fisson Yeast TAP",
+                      "Round Worm Y2H","Round Worm TAP")
+
+savegdda<-savegdda+t(savegdda)
+savegdda<-1-savegdda
+diag(savegdda)<-rep(0,18)
+test_gdda<-as.dist(savegdda, diag = T)
+pdf("gdda.pdf")
+plot(hclust(test_gdda, method = "average"), main = "GDDA Dendrogram Clustering For Full Networks",
+     xlab = "")
+dev.off()
+
+
+#GCD###########
+#this is for gcd11 on full networks
+gcd11_matrix<-matrix(0,ncol = 14,nrow = 14)
+for (i in 1:14){
+  for (j in i:14) {
+    pa<-orca2(newgcdlist[[i]], subgraph_size = "five")
+    pb<-orca2(newgcdlist[[j]], subgraph_size = "five")
+    inpu_gcd11<-gcd(pa,pb, whatorbits = 11)
+    gcd11_matrix[i,j]<-inpu_gcd11
+  }
+} 
+
+savegcd11_matrix<-gcd11_matrix
+colnames(savegcd11_matrix)<-c("Human Y2H","Human TAP","Fly Y2H","Fly TAP","Rockress Y2H","Rockress TAP",
+                              "Yeast Y2H","Yeast TAP","Mouse Y2H","Mouse TAP","Fission Yeast Y2H","Fisson Yeast TAP",
+                              "Round Worm Y2H","Round Worm TAP")
+
+savegcd11_matrix<-t(savegcd11_matrix)+savegcd11_matrix
+diag(savegcd11_matrix)<-rep(0,14)
+test_cluster33<-as.dist(savegcd11_matrix, diag = T)
+pdf("gcd.pdf")
+plot(hclust(test_cluster33, method = "average"),main = "GCD11 Dendrogram for The Full Networks",xlab = "")
+dev.off()
+
+
+
+
+
+#study high throughput#######
+parse_biogrid(route_homo_sapiens, 
+              interspecies = FALSE,
+              loops = FALSE,
+              experimental_system = "Two-hybrid",
+              experimental_system_type = NULL,
+              throughput = "High Throughput")
+
+parse_biogrid(route_homo_sapiens, 
+              interspecies = FALSE,
+              loops = FALSE,
+              experimental_system = "Affinity Capture-MS",
+              experimental_system_type = NULL,
+              throughput = "High Throughput")
+
+parse_biogrid(route_yeast, 
+              interspecies = FALSE,
+              loops = FALSE,
+              experimental_system = "Two-hybrid",
+              experimental_system_type = NULL,
+              throughput = "High Throughput")
+
+parse_biogrid(route_yeast, 
+              interspecies = FALSE,
+              loops = FALSE,
+              experimental_system = "Affinity Capture-MS",
+              experimental_system_type = NULL,
+              throughput = "High Throughput")
+
+parse_biogrid(route_fly, 
+              interspecies = FALSE,
+              loops = FALSE,
+              experimental_system = "Two-hybrid",
+              experimental_system_type = NULL,
+              throughput = "High Throughput")
+
+parse_biogrid(route_fly, 
+              interspecies = FALSE,
+              loops = FALSE,
+              experimental_system = "Affinity Capture-MS",
+              experimental_system_type = NULL,
+              throughput = "High Throughput")
+
+parse_biogrid(route_Arabidopsis_thaliana_Columbia, 
+              interspecies = FALSE,
+              loops = FALSE,
+              experimental_system = "Two-hybrid",
+              experimental_system_type = NULL,
+              throughput = "High Throughput")
+
+parse_biogrid(route_Arabidopsis_thaliana_Columbia, 
+              interspecies = FALSE,
+              loops = FALSE,
+              experimental_system = "Affinity Capture-MS",
+              experimental_system_type = NULL,
+              throughput = "High Throughput")
+
+parse_biogrid(route_mus_musculus, 
+              interspecies = FALSE,
+              loops = FALSE,
+              experimental_system = "Two-hybrid",
+              experimental_system_type = NULL,
+              throughput = "High Throughput")
+
+parse_biogrid(route_mus_musculus, 
+              interspecies = FALSE,
+              loops = FALSE,
+              experimental_system = "Affinity Capture-MS",
+              experimental_system_type = NULL,
+              throughput = "High Throughput")
+
+parse_biogrid(route_Schizosaccharomyces_pombe, 
+              interspecies = FALSE,
+              loops = FALSE,
+              experimental_system = "Two-hybrid",
+              experimental_system_type = NULL,
+              throughput = "High Throughput")
+
+parse_biogrid(route_Schizosaccharomyces_pombe, 
+              interspecies = FALSE,
+              loops = FALSE,
+              experimental_system = "Affinity Capture-MS",
+              experimental_system_type = NULL,
+              throughput = "High Throughput")
+
+parse_biogrid(route_Caenorhabditis_elegans, 
+              interspecies = FALSE,
+              loops = FALSE,
+              experimental_system = "Two-hybrid",
+              experimental_system_type = NULL,
+              throughput = "High Throughput")
+
+parse_biogrid(route_Caenorhabditis_elegans, 
+              interspecies = FALSE,
+              loops = FALSE,
+              experimental_system = "Affinity Capture-MS",
+              experimental_system_type = NULL,
+              throughput = "High Throughput")
+
+
+#community dection########
+commu_homo_sapien_Y2H_igraph_large<-fastgreedy.community(homo_sapien_Y2H_igraph_large)
+commu_homo_sapien_TAP_igraph_large<-fastgreedy.community(homo_sapien_TAP_igraph_large)
+commu_fly_Y2H_igraph_large<-fastgreedy.community(fly_Y2H_igraph_large)
+commu_fly_TAP_igraph_large<-fastgreedy.community(fly_TAP_igraph_large)
+commu_Arabidopsis_thaliana_Columbia_Y2H_igraph_large<-fastgreedy.community(Arabidopsis_thaliana_Columbia_Y2H_igraph_large)
+commu_Arabidopsis_thaliana_Columbia_TAP_igraph_large<-fastgreedy.community(Arabidopsis_thaliana_Columbia_TAP_igraph_large)
+commu_yeast_Y2H_igraph_large<-fastgreedy.community(yeast_Y2H_igraph_large)
+commu_yeast_TAP_igraph_large<-fastgreedy.community(yeast_TAP_igraph_large)
+commu_mus_musculus_Y2H_igraph_large<-fastgreedy.community(mus_musculus_Y2H_igraph_large)
+commu_mus_musculus_TAP_igraph_large<-fastgreedy.community(mus_musculus_TAP_igraph_large)
+commu_Schizosaccharomyces_pombe_Y2H_igraph_large<-fastgreedy.community(Schizosaccharomyces_pombe_Y2H_igraph_large)
+commu_Schizosaccharomyces_pombe_TAP_igraph_large<-fastgreedy.community(Schizosaccharomyces_pombe_TAP_igraph_large)
+commu_Caenorhabditis_elegans_Y2H_igraph_large<-fastgreedy.community(Caenorhabditis_elegans_Y2H_igraph_large)
+commu_Caenorhabditis_elegans_TAP_igraph_large<-fastgreedy.community(Caenorhabditis_elegans_TAP_igraph_large)
+
+
+
+print(commu_homo_sapien_Y2H_igraph_large)
+print(commu_homo_sapien_TAP_igraph_large)
+print(commu_fly_Y2H_igraph_large)
+print(commu_fly_TAP_igraph_large)
+print(commu_Arabidopsis_thaliana_Columbia_Y2H_igraph_large)
+print(commu_Arabidopsis_thaliana_Columbia_TAP_igraph_large)
+print(commu_yeast_Y2H_igraph_large)
+print(commu_yeast_TAP_igraph_large)
+print(commu_mus_musculus_Y2H_igraph_large)
+print(commu_mus_musculus_TAP_igraph_large)
+print(commu_Schizosaccharomyces_pombe_Y2H_igraph_large)
+print(commu_Schizosaccharomyces_pombe_TAP_igraph_large)
+print(commu_Caenorhabditis_elegans_Y2H_igraph_large)
+print(commu_Caenorhabditis_elegans_TAP_igraph_large)
+
+
+modularity(homo_sapien_Y2H_igraph_large,membership(commu_homo_sapien_Y2H_igraph_large))
+modularity(homo_sapien_TAP_igraph_large,membership(commu_homo_sapien_TAP_igraph_large))
+modularity(fly_Y2H_igraph_large,membership(commu_fly_Y2H_igraph_large))
+modularity(fly_TAP_igraph_large,membership(commu_fly_TAP_igraph_large))
+modularity(Arabidopsis_thaliana_Columbia_Y2H_igraph_large,membership(commu_Arabidopsis_thaliana_Columbia_Y2H_igraph_large))
+modularity(Arabidopsis_thaliana_Columbia_TAP_igraph_large,membership(commu_Arabidopsis_thaliana_Columbia_TAP_igraph_large))
+modularity(yeast_Y2H_igraph_large,membership(commu_yeast_Y2H_igraph_large))
+modularity(yeast_TAP_igraph_large,membership(commu_yeast_TAP_igraph_large))
+modularity(mus_musculus_Y2H_igraph_large,membership(commu_mus_musculus_Y2H_igraph_large))
+modularity(mus_musculus_TAP_igraph_large,membership(commu_mus_musculus_TAP_igraph_large))
+modularity(Schizosaccharomyces_pombe_Y2H_igraph_large,membership(commu_Schizosaccharomyces_pombe_Y2H_igraph_large))
+modularity(Schizosaccharomyces_pombe_TAP_igraph_large,membership(commu_Schizosaccharomyces_pombe_TAP_igraph_large))
+modularity(Caenorhabditis_elegans_Y2H_igraph_large,membership(commu_Caenorhabditis_elegans_Y2H_igraph_large))
+modularity(Caenorhabditis_elegans_TAP_igraph_large,membership(commu_Caenorhabditis_elegans_TAP_igraph_large))
