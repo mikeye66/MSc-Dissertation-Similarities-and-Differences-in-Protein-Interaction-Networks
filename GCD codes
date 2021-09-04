@@ -1,0 +1,155 @@
+gcd=function(orbitsa,orbitsb,whatorbits=c("11","4nodes","5nodes")[1]){
+  if(whatorbits=="11") ind=(1:12)[-4]
+  if(whatorbits=="4nodes") ind=(1:15)
+  if(whatorbits=="5nodes") ind=(1:73)
+  if(ncol(orbitsa) < length(ind) | ncol(orbitsa) < length(ind) ) stop("Orbits missing")
+  #
+  orbitsa=orbitsa[,ind] #take the eleven non redundant orbits from the paper
+  orbitsb=orbitsb[,ind]
+  #
+  gcda <- tryCatch( cor(orbitsa,method="spearman"), warning=function(w) {
+    gcdwarning <- "gcd_spearman_warning";return(gcdwarning) } )##warning is due to columns with the same value across al nodes (not only the zero counts as described in SI of GCD PAPER)
+  #
+  if(gcda[1]=="gcd_spearman_warning" ){
+    orbitsa=rbind(orbitsa,rep(1,length(ind))) #take the eleven non redundant orbits from the paper
+    gcda <- cor(orbitsa,method="spearman")
+  }
+  #
+  gcdb <- tryCatch( cor(orbitsb,method="spearman"), warning=function(w) {
+    gcdwarning <- "gcd_spearman_warning";return(gcdwarning) } )
+  if(gcdb[1]=="gcd_spearman_warning" ){
+    orbitsb=rbind(orbitsb,rep(1,length(ind)))
+    gcdb <- cor(orbitsb,method="spearman")
+  }
+  #
+  id=upper.tri(gcda)
+  gcdval=sqrt(sum( ( gcda[id]-gcdb[id] )^2))
+  return(gcdval)
+}#end gcd func
+
+orca2=function(graph,subgraph_size=c("four","five","three")[1]){
+  if(!is.simple(graph)) warning("Graph is not simple")
+  #If graph does not have edges
+  if(ecount(graph)<1){ 
+    if(subgraph_size=="four" || subgraph_size=="three") return(matrix(nrow=vcount(graph),ncol=15,0))
+    if(subgraph_size=="five") return(matrix(nrow=vcount(graph),ncol=73,0))
+  }
+  #If graph has edges
+  V(graph)$name=paste(1:vcount(graph)) #required for orca #possible BUG in V()
+  e_list=matrix(ncol=2,nrow=ecount(graph),as.integer(get.edgelist(graph)))
+  if(subgraph_size[1]=="three")
+    orbitcounts<-trianglecount4(e_list) #modified orca version that is in leofthr package
+  else {
+    if(subgraph_size[1]=="four")
+      orbitcounts<-count4(e_list)
+    if(subgraph_size[1]=="five")
+      orbitcounts<-count5(e_list)
+  }
+  return(orbitcounts)
+  #tri=sum(orbitcounts[,4])/3
+}
+
+
+faster_gdda_table=function(x){#does not coutn 0 which is what gdda does
+  x=x[x>0]
+  if(length(x) < 1){ 
+    b=c(0)
+    b=b[b>0]
+    return(b)
+  }
+  x=as.integer(x)
+  xmin=min(x)
+  x=x-xmin+1
+  a=tabulate(x)
+  ind=which(a>0.5)
+  a=a[ind]
+  b=rbind(ind+xmin-1,a)
+  rm(a)
+  rm(ind)
+  if(is.vector(b)) b=t(t(b))
+  #colnames(b)=b[1,]
+  return(b)
+}
+#
+factor_gdda_table=function(x){#does not coutn 0 which is what gdda does
+  x=x[x>0]
+  if(length(x) < 1){ 
+    b=c(0)
+    b=b[b>0]
+    return(b)
+  }
+  x=as.factor(x)
+  lev=levels(x)
+  a=tabulate(x)
+  b=rbind(as.integer(lev),as.integer(a))
+  rm(a)
+  if(is.vector(b)) b=t(t(b))
+  return(b)
+}
+
+#
+gdda=function(orbitsa,orbitsb){#being tested. but seems to be faster than previous gddas. serveal test done, no problems so far.
+  D=rep(NA,73)
+  for(i in 1:73){#for each of the 73 orbits
+    therange=range(orbitsa[,i])
+    if(therange[2]-therange[1] > 2* 10^5 ){
+      dega=factor_gdda_table(orbitsa[,i])#preserves ram, but more than 10 times slower
+    }else{
+      dega=faster_gdda_table(orbitsa[,i])#Ram consuming but fast
+    }
+    therange=range(orbitsb[,i])
+    if(therange[2]-therange[1] > 2* 10^5){
+      degb=factor_gdda_table(orbitsb[,i])
+    }else{
+      degb=faster_gdda_table(orbitsb[,i])
+    }
+    #
+    if(is.vector(dega)) dega=t(t(dega)) ; if(is.vector(degb)) degb=t(t(degb))#when only one degree is different than zero
+    #
+    if(length(dega)<1 & length(degb)<1){#if they only share degree zero
+      D[i]=0 #means they are not different
+      next #next in loop
+    }
+    if(length(dega)<1){#if a has degree zero only
+      degb[2,]=degb[2,]/degb[1,]; degb[2,]=degb[2,]/sum(degb[2,]) 
+      D[i]= sqrt(sum(degb[2,]^2)/2)
+      next #next in loop 
+    }
+    if(length(degb)<1){#if b has degree zero only
+      dega[2,]=dega[2,]/dega[1,]; dega[2,]=dega[2,]/sum(dega[2,]) 
+      D[i]= sqrt(sum(dega[2,]^2)/2)
+      next #next in loop
+    }
+    #
+    dega[2,]=dega[2,]/dega[1,]; dega[2,]=dega[2,]/sum(dega[2,]) #gdda standard
+    degb[2,]=degb[2,]/degb[1,]; degb[2,]=degb[2,]/sum(degb[2,]) 
+    ind=match(dega[1,],degb[1,])    #fastmatch increase ram in GDDA, specailly in multicore case
+    isna_ind= !is.na(ind)
+    if(length(ind[isna_ind])<1){
+      D[i]= sum((dega[2,])^2) + sum((degb[2,])^2) #if empty sums zero
+    }else{
+      D[i]= sum( (dega[2,isna_ind] - degb[2,ind[isna_ind]])^2) +
+        sum((dega[2,!isna_ind])^2) + sum((degb[2,-ind[isna_ind]])^2) #if empty sums zero
+    }
+    #print(D[i])
+    D[i]=sqrt(D[i]/2)
+  }#end for
+  gddaval=mean(1-D)
+  return(gddaval)
+}#end gdda func
+#///
+
+
+require(igraph)
+require(orca)
+g1<- erdos.renyi.game(50,p.or.m = .1)
+g2<- erdos.renyi.game(50,p.or.m = .1)
+
+props_a= orca2(graph = g1, subgraph_size = "five")
+props_b= orca2(graph = g2, subgraph_size = "five")
+
+gdda(props_a,props_b)
+  
+gcd(props_a,props_b)
+
+
