@@ -7,6 +7,7 @@ The main R code is divided into sections:
 
 1, data loading section
 This section requires external data from the BioGRID website, which can be accessed by https://thebiogrid.org/
+The parser attached in the Github is also required
 
 2, Network summary metrics
 This section considers applying global and local network summary metrics to the PPI networks
