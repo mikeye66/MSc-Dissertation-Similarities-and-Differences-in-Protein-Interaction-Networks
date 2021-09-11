@@ -1306,6 +1306,28 @@ TreeDistance(genetictree,EMD_TAP_tree)
 
 
 
+#random tree for the baselines
+muture<-rep(0,1000)
+for (i in 1:1000) {
+  rantree<-rtree(7,rooted = T, tip.label = c('roundworm','fissionyeast','rockress','mouse','fly','human','yeast'))
+  muture[i]<-MutualClusteringInfo(genetictree,rantree)
+}
+mean(muture)
+
+nye<-rep(0,1000)
+for (i in 1:1000) {
+  rantree<-rtree(7,rooted = T, tip.label = c('roundworm','fissionyeast','rockress','mouse','fly','human','yeast'))
+  nye[i]<-NyeSimilarity(genetictree,rantree)
+}
+mean(nye)
+
+share<-rep(0,1000)
+for (i in 1:1000) {
+  rantree<-rtree(7,rooted = T, tip.label = c('roundworm','fissionyeast','rockress','mouse','fly','human','yeast'))
+  share[i]<-SharedPhylogeneticInfo(genetictree,rantree)
+}
+mean(share)
+
 
 
 ######################
@@ -1480,7 +1502,244 @@ multiple_test(observed = saveemd_five_matrix2_large,
               mantel_time = 1000)
 
 
+#Signifiance testing for Netdis######
+new_self_testing_dis_large2<-function(){
+  select<-seq(1,13,2)
+  null_networklist<-list()
+  netlist<-list(as.data.frame(get.edgelist(homo_sapien_Y2H_igraph_large)),
+                as.data.frame(get.edgelist(homo_sapien_TAP_igraph_large)),
+                as.data.frame(get.edgelist(fly_Y2H_igraph_large)),
+                as.data.frame(get.edgelist(fly_TAP_igraph_large)),
+                as.data.frame(get.edgelist(Arabidopsis_thaliana_Columbia_Y2H_igraph_large)),
+                as.data.frame(get.edgelist(Arabidopsis_thaliana_Columbia_TAP_igraph_large)),
+                as.data.frame(get.edgelist(yeast_Y2H_igraph_large)),
+                as.data.frame(get.edgelist(yeast_TAP_igraph_large)),
+                as.data.frame(get.edgelist(mus_musculus_Y2H_igraph_large)),
+                as.data.frame(get.edgelist(mus_musculus_TAP_igraph_large)),
+                as.data.frame(get.edgelist(Schizosaccharomyces_pombe_Y2H_igraph_large)),
+                as.data.frame(get.edgelist(Schizosaccharomyces_pombe_TAP_igraph_large)),
+                as.data.frame(get.edgelist(Caenorhabditis_elegans_Y2H_igraph_large)),
+                as.data.frame(get.edgelist(Caenorhabditis_elegans_TAP_igraph_large)))
+  for (i in select){
+    newnet<-rbind(netlist[[i]],netlist[[i+1]])
+    sizei<-nrow(netlist[[i]])
+    sizei1<-nrow(netlist[[i+1]])
+    sizeall<-nrow(newnet)
+    sele<-sample(1:sizeall)
+    newnet1<-sele[1:sizei]
+    newnet2<-sele[sizei+1:sizeall]
+    newnet1_data<-newnet[newnet1,]
+    newnet2_data<-newnet[newnet2,]
+    newnet1_igraph<-graph_from_data_frame(newnet1_data)
+    newnet2_igraph<-graph_from_data_frame(newnet2_data)
+    newnet1_igraph<-simplify_graph(newnet1_igraph)
+    newnet2_igraph<-simplify_graph(newnet2_igraph)
+    null_networklist[[i]]<-newnet1_igraph
+    null_networklist[[i+1]]<-newnet2_igraph
+  }
+  null_net_matrix1<-matrix(0,ncol = 14,nrow = 14)
+  null_net_matrix2<-matrix(0,ncol = 14,nrow = 14)
+  
+  max_graphlet_size = 4
+  neighbourhood_size = 2
+  min_ego_nodes = 3
+  min_ego_edges=1
+  min_bin_count=5
+  num_bins=100
+  
+  ego_counts<-list()
+  ego_graphs<-list()
+  for(i in 1:14){
+    ego_graphs[[i]]<-make_named_ego_graph(null_networklist[[i]], 
+                                          order = neighbourhood_size, 
+                                          min_ego_nodes = min_ego_nodes, 
+                                          min_ego_edges = min_ego_edges)
+    ego_counts[[i]]<-ego_to_graphlet_counts(ego_graphs[[i]], max_graphlet_size = max_graphlet_size)
+  }
+  
+  for (i in 1:14){
+    for (j in i:14) {
+      graph_1<-null_networklist[[i]]
+      graph_2<-null_networklist[[j]]
+      ego_1<-ego_graphs[[i]]
+      ego_2<-ego_graphs[[j]]
+      graphlet_counts_1<-ego_counts[[i]]
+      graphlet_counts_2<-ego_counts[[j]]
+      # Get ego-network densities
+      densities_1 <- ego_network_density(graphlet_counts_1)
+      densities_2 <- ego_network_density(graphlet_counts_2)
+      
+      # Adaptively bin ego-network densities
+      binned_densities_1 <- binned_densities_adaptive(densities_1, 
+                                                      min_counts_per_interval = min_bin_count, 
+                                                      num_intervals = num_bins)
+      
+      ego_density_bins_1 <- binned_densities_1$breaks
+      
+      binned_densities_2 <- binned_densities_adaptive(densities_2, 
+                                                      min_counts_per_interval = min_bin_count, 
+                                                      num_intervals = num_bins)
+      
+      ego_density_bins_2 <- binned_densities_2$breaks
+      #' INTERNAL FUNCTION - DO NOT CALL DIRECTLY
+      #' Calculate expected counts with geometric poisson (Polya-Aeppli)
+      #' approximation for a single density bin.
+      #' @param bin_idx Density bin index to calculate expected counts for.
+      #' @param graphlet_counts Graphlet counts for a number of ego_networks.
+      #' @param density_interval_indexes Density bin index for
+      #' each ego network.
+      exp_counts_bin_gp <- function(bin_idx, graphlet_counts,
+                                    density_interval_indexes,
+                                    mean_binned_graphlet_counts,
+                                    max_graphlet_size) {
+        counts <- graphlet_counts[density_interval_indexes == bin_idx, ]
+        means <- mean_binned_graphlet_counts[bin_idx, ]
+        
+        mean_sub_counts <- sweep(counts, 2, means)
+        
+        Vd_sq <- colSums(mean_sub_counts^2) / (nrow(mean_sub_counts) - 1)
+        theta_d <- 2 * means / (Vd_sq + means)
+        
+        exp_counts_dk <- vector()
+        for (k in 2:max_graphlet_size) {
+          graphlet_idx <- graphlet_ids_for_size(k)
+          
+          lambda_dk <- mean(2 * means[graphlet_idx]^2 /
+                              (Vd_sq[graphlet_idx] + means[graphlet_idx]),
+                            na.rm = TRUE)
+          
+          exp_counts_dk <- append(exp_counts_dk,
+                                  lambda_dk / theta_d[graphlet_idx])
+        }
+        
+        exp_counts_dk
+      }
+      
+      #' Calculate expected counts in density bins using the
+      #' geometric poisson (Polya-Aeppli) approximation.
+      #' @param graphlet_counts Graphlet counts for a number of ego_networks.
+      #' @param density_interval_indexes Density bin index for
+      #' each ego network.
+      #' @param max_graphlet_size Determines the maximum size of graphlets
+      #' included in graphlet_counts.
+      #' @export
+      density_binned_counts_gp <- function(graphlet_counts,
+                                           density_interval_indexes,
+                                           max_graphlet_size) {
+        
+        mean_binned_graphlet_counts <- mean_density_binned_graphlet_counts(
+          graphlet_counts,
+          density_interval_indexes)
+        
+        nbins <- length(unique(density_interval_indexes))
+        expected_counts_bin <- t(sapply(1:nbins,
+                                        exp_counts_bin_gp,
+                                        graphlet_counts = graphlet_counts,
+                                        density_interval_indexes = density_interval_indexes,
+                                        mean_binned_graphlet_counts = mean_binned_graphlet_counts,
+                                        max_graphlet_size = max_graphlet_size))
+        
+        # deal with NAs caused by bins with zero counts for a graphlet
+        expected_counts_bin[is.nan(expected_counts_bin)] <- 0
+        
+        expected_counts_bin
+      }
+      
+      binned_graphlet_counts_1 <- density_binned_counts_gp(graphlet_counts_1,
+                                                           binned_densities_1$interval_indexes,
+                                                           max_graphlet_size)
+      
+      binned_graphlet_counts_2 <- density_binned_counts_gp(graphlet_counts_2,
+                                                           binned_densities_2$interval_indexes,
+                                                           max_graphlet_size)
+      # Calculate expected graphlet counts for each ego network
+      exp_graphlet_counts_1 <- netdis_expected_counts(graphlet_counts_1, 
+                                                      ego_density_bins_1, 
+                                                      binned_graphlet_counts_1,
+                                                      max_graphlet_size,
+                                                      scale_fn = NULL)
+      
+      
+      exp_graphlet_counts_2 <- netdis_expected_counts(graphlet_counts_2, 
+                                                      ego_density_bins_2, 
+                                                      binned_graphlet_counts_2,
+                                                      max_graphlet_size,
+                                                      scale_fn = NULL)
+      # Centre graphlet counts by subtracting expected counts
+      centred_graphlet_counts_1 <- netdis_subtract_exp_counts(graphlet_counts_1,
+                                                              exp_graphlet_counts_1,
+                                                              max_graphlet_size)
+      
+      centred_graphlet_counts_2 <- netdis_subtract_exp_counts(graphlet_counts_2,
+                                                              exp_graphlet_counts_2,
+                                                              max_graphlet_size)
+      sum_graphlet_counts_1 <- colSums(centred_graphlet_counts_1)
+      
+      sum_graphlet_counts_2 <- colSums(centred_graphlet_counts_2)
+      netdis_result <- netdis_uptok(sum_graphlet_counts_1, 
+                                    sum_graphlet_counts_2, 
+                                    max_graphlet_size)
+      null_net_matrix1[i,j]<-netdis_result[1]
+      null_net_matrix2[i,j]<-netdis_result[2]
+    }
+  } 
+  return(list(null_net_matrix1,null_net_matrix2))
+}
+#above function generates the null netdis matrices
 
+new_testing_bundle_dis_large2_1<-sapply(1:3, function(x){new_self_testing_dis_large2()})
+new_testing_bundle_dis_large2_2<-sapply(1:3, function(x){new_self_testing_dis_large2()})
+new_testing_bundle_dis_large2_3<-sapply(1:3, function(x){new_self_testing_dis_large2()})
+new_testing_bundle_dis_large2_4<-sapply(1:11, function(x){new_self_testing_dis_large2()})
+new_testing_bundle_dis_large2_5<-sapply(1:5, function(x){new_self_testing_dis_large2()})
+new_testing_bundle_dis_large2_6<-sapply(1:2, function(x){new_self_testing_dis_large2()})
+new_testing_bundle_dis_large2_7<-sapply(1:3, function(x){new_self_testing_dis_large2()})
+new_testing_bundle_dis_large2_8<-sapply(1:2, function(x){new_self_testing_dis_large2()})
+new_testing_bundle_dis_large2_9<-sapply(1:3, function(x){new_self_testing_dis_large2()})
+new_testing_bundle_dis_large2_10<-sapply(1:3, function(x){new_self_testing_dis_large2()})
+
+#generate the two bundles of size 20
+testing_all<-sapply(1:20, function(x){new_self_testing_dis_large2()})
+repetition_all<-sapply(1:20, function(x){new_self_testing_dis_large2()})
+
+#testing for size 4 graphlets
+rep_bundle_all_dis_large2_4<-list()
+for (i in seq(2,40,2)) {
+  processing<-repetition_all[[i]]
+  processing<-t(processing)+processing
+  diag(processing)<-rep(0,14)
+  processing<-list(processing)
+  rep_bundle_all_dis_large2_4<-c(rep_bundle_all_dis_large2_4,processing)
+}
+testing_bundle_all_dis_large2_4<-list()
+for (i in seq(2,40,2)) {
+  processing<-testing_all[[i]]
+  processing<-t(processing)+processing
+  diag(processing)<-rep(0,14)
+  processing<-list(processing)
+  testing_bundle_all_dis_large2_4<-c(testing_bundle_all_dis_large2_4,processing)
+}
+multiple_test(observed = savenet2_matrix2,testing_bundle = testing_bundle_all_dis_large2_4,rep_bundle = rep_bundle_all_dis_large2_4,mantel_time = 1000)
+
+
+#testing for size 3 graphlets
+rep_bundle_all_dis_large2_3<-list()
+for (i in seq(1,39,2)) {
+  processing<-repetition_all[[i]]
+  processing<-t(processing)+processing
+  diag(processing)<-rep(0,14)
+  processing<-list(processing)
+  rep_bundle_all_dis_large2_3<-c(rep_bundle_all_dis_large2_3,processing)
+}
+testing_bundle_all_dis_large2_3<-list()
+for (i in seq(1,39,2)) {
+  processing<-testing_all[[i]]
+  processing<-t(processing)+processing
+  diag(processing)<-rep(0,14)
+  processing<-list(processing)
+  testing_bundle_all_dis_large2_3<-c(testing_bundle_all_dis_large2_3,processing)
+}
+multiple_test(observed = savenet2_matrix2,testing_bundle = testing_bundle_all_dis_large2_3,rep_bundle = rep_bundle_all_dis_large2_3,mantel_time = 1000)
 
 
 
